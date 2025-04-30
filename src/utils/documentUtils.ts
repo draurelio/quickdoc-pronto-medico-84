@@ -25,16 +25,38 @@ export const generateMedicalRecordHtml = (data: DocumentData): string => {
   const formattedCurrentDate = formatDate(patient.currentDate);
 
   // Create prescription table rows
-  const prescriptionRows = prescriptions.map(item => `
+  const prescriptionRows = prescriptions.map((item, index) => `
     <tr>
-      <td style="border: 1px solid #ccc; padding: 8px;">${item.medication}</td>
-      <td style="border: 1px solid #ccc; padding: 8px;">${item.dose}</td>
-      <td style="border: 1px solid #ccc; padding: 8px;">${item.route}</td>
-      <td style="border: 1px solid #ccc; padding: 8px;">${item.frequency}</td>
-      <td style="border: 1px solid #ccc; padding: 8px;">${item.notes}</td>
-      <td style="border: 1px solid #ccc; padding: 8px;">${item.time}</td>
+      <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${index + 1}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.medication || 'undefined'}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.dose || 'undefined'}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.route || 'undefined'}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.frequency || 'undefined'}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.notes || 'undefined'}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.time || 'undefined'}</td>
     </tr>
   `).join('');
+
+  // Add empty rows to match the template (total of 18 rows)
+  const totalRows = 18;
+  const emptyRowsCount = totalRows - prescriptions.length;
+  let emptyRows = '';
+  
+  if (emptyRowsCount > 0) {
+    for (let i = 0; i < emptyRowsCount; i++) {
+      emptyRows += `
+        <tr>
+          <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${prescriptions.length + i + 1}</td>
+          <td style="border: 1px solid #ccc; padding: 4px;"></td>
+          <td style="border: 1px solid #ccc; padding: 4px;"></td>
+          <td style="border: 1px solid #ccc; padding: 4px;"></td>
+          <td style="border: 1px solid #ccc; padding: 4px;"></td>
+          <td style="border: 1px solid #ccc; padding: 4px;"></td>
+          <td style="border: 1px solid #ccc; padding: 4px;"></td>
+        </tr>
+      `;
+    }
+  }
 
   return `
     <!DOCTYPE html>
@@ -45,61 +67,68 @@ export const generateMedicalRecordHtml = (data: DocumentData): string => {
       <style>
         body {
           font-family: Arial, sans-serif;
-          line-height: 1.6;
+          line-height: 1.4;
           color: #333;
           margin: 20px;
         }
-        h1, h2, h3, h4 {
-          color: #0A6ED1;
-          margin-top: 20px;
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
         }
-        h1 {
-          text-align: center;
-          border-bottom: 2px solid #0A6ED1;
-          padding-bottom: 10px;
+        .logo {
+          max-width: 300px;
+          height: auto;
         }
-        .header-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-        }
-        .header-item {
-          margin-bottom: 10px;
-        }
-        .section {
-          margin: 20px 0;
-          border: 1px solid #ccc;
-          padding: 15px;
-          border-radius: 5px;
-        }
-        table {
+        .patient-info-table {
           width: 100%;
           border-collapse: collapse;
-          margin: 15px 0;
+          margin-bottom: 15px;
         }
-        th, td {
+        .patient-info-table td {
+          border: 1px solid #000;
+          padding: 4px 8px;
+        }
+        .medical-info {
+          display: flex;
+          flex-direction: column;
+        }
+        .medical-info-row {
+          display: flex;
+        }
+        .medical-info-label {
+          width: 150px;
+          font-weight: bold;
+          text-transform: uppercase;
+          padding: 4px;
+          border-left: 1px solid #ccc;
+          border-right: 1px solid #ccc;
+        }
+        .prescription-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        .prescription-table th, .prescription-table td {
           border: 1px solid #ccc;
-          padding: 8px;
+          padding: 4px;
         }
-        th {
-          background-color: #f0f7ff;
-          color: #0A6ED1;
+        .prescription-table th {
+          background-color: #e6e6e6;
           font-weight: bold;
+          text-align: center;
         }
-        .field-title {
+        .section-header {
+          text-transform: uppercase;
           font-weight: bold;
-          color: #0A6ED1;
-          margin-top: 10px;
-          margin-bottom: 5px;
-        }
-        .field-content {
-          margin-left: 15px;
-          white-space: pre-wrap;
+          padding: 6px;
+          background-color: #e6e6e6;
+          text-align: center;
         }
         @media print {
           body {
             margin: 0;
-            padding: 20px;
+            padding: 15px;
           }
           button {
             display: none;
@@ -108,84 +137,64 @@ export const generateMedicalRecordHtml = (data: DocumentData): string => {
       </style>
     </head>
     <body>
-      <h1>Prontuário Médico</h1>
-      
-      <div class="section">
-        <h2>Dados do Paciente</h2>
-        <div class="header-grid">
-          <div class="header-item">
-            <span class="field-title">Nome:</span>
-            <div class="field-content">${patient.name || 'Não informado'}</div>
-          </div>
-          <div class="header-item">
-            <span class="field-title">Idade:</span>
-            <div class="field-content">${patient.age || 'Não informada'}</div>
-          </div>
-          <div class="header-item">
-            <span class="field-title">Data de Internação (DIH):</span>
-            <div class="field-content">${formattedAdmissionDate || 'Não informada'}</div>
-          </div>
-          <div class="header-item">
-            <span class="field-title">Data Atual:</span>
-            <div class="field-content">${formattedCurrentDate || 'Não informada'}</div>
-          </div>
-          <div class="header-item">
-            <span class="field-title">Origem:</span>
-            <div class="field-content">${patient.origin || 'Não informada'}</div>
-          </div>
-        </div>
-        <div class="header-item">
-          <span class="field-title">Diagnóstico:</span>
-          <div class="field-content">${patient.diagnosis || 'Não informado'}</div>
-        </div>
-        <div class="header-item">
-          <span class="field-title">Alergias:</span>
-          <div class="field-content">${patient.allergies || 'Não há alergias informadas'}</div>
-        </div>
+      <div class="header">
+        <div></div>
+        <img src="/lovable-uploads/b7e14262-53db-4dcd-851d-cf61ff9a45d0.png" alt="Hospital Dr. Aurélio" class="logo">
       </div>
       
-      <div class="section">
-        <h2>Prescrição Médica</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Medicação</th>
-              <th>Dose</th>
-              <th>Via</th>
-              <th>Posologia</th>
-              <th>Observações</th>
-              <th>Horário</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${prescriptionRows || '<tr><td colspan="6" style="text-align: center;">Nenhuma medicação prescrita</td></tr>'}
-          </tbody>
-        </table>
-      </div>
+      <table class="patient-info-table">
+        <tr>
+          <td style="width: 50%"><strong>NOME:</strong> ${patient.name || ''}</td>
+          <td style="width: 20%"><strong>IDADE: ANOS</strong> ${patient.age || ''}</td>
+          <td style="width: 30%"><strong>DIH:</strong> ${formattedAdmissionDate || ''}</td>
+        </tr>
+        <tr>
+          <td><strong>DIAGNÓSTICO:</strong> ${patient.diagnosis || ''}</td>
+          <td><strong>ALERGIAS:</strong> ${patient.allergies || ''}</td>
+          <td><strong>ORIGEM:</strong> ${patient.origin || ''}</td>
+        </tr>
+      </table>
       
-      <div class="section">
-        <h2>Admissão Médica e Evolução</h2>
-        
-        <div class="field-title">Admissão:</div>
-        <div class="field-content">${medical.admission || 'Não informado'}</div>
-        
-        <div class="field-title">Comorbidades:</div>
-        <div class="field-content">${medical.comorbidities || 'Não informado'}</div>
-        
-        <div class="field-title">MUC (Motivo do uso da medicação):</div>
-        <div class="field-content">${medical.medicationReason || 'Não informado'}</div>
-        
-        <div class="field-title">Exame Físico:</div>
-        <div class="field-content">${medical.physicalExam || 'Não informado'}</div>
-        
-        <div class="field-title">Análise:</div>
-        <div class="field-content">${medical.analysis || 'Não informado'}</div>
-        
-        <div class="field-title">Condutas:</div>
-        <div class="field-content">${medical.plans || 'Não informado'}</div>
-      </div>
+      <table class="prescription-table">
+        <tr>
+          <th class="section-header" style="width: 150px;">ADMISSÃO MÉDICA</th>
+          <th class="section-header" colspan="6">MEDICAÇÃO</th>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; border-right: 1px solid #ccc;" rowspan="18">
+            <div class="medical-info">
+              <div><strong>ADMISSÃO:</strong></div>
+              <div style="margin-bottom: 10px;">${medical.admission || ''}</div>
+              
+              <div><strong>COMORBIDADES:</strong></div>
+              <div style="margin-bottom: 10px;">${medical.comorbidities || ''}</div>
+              
+              <div><strong>MUC:</strong></div>
+              <div style="margin-bottom: 10px;">${medical.medicationReason || ''}</div>
+              
+              <div><strong>EXAME FÍSICO:</strong></div>
+              <div style="margin-bottom: 10px;">${medical.physicalExam || ''}</div>
+              
+              <div><strong>ANÁLISE:</strong></div>
+              <div style="margin-bottom: 10px;">${medical.analysis || ''}</div>
+              
+              <div><strong>CONDUTAS:</strong></div>
+              <div>${medical.plans || ''}</div>
+            </div>
+          </td>
+          <th style="text-align: center;">#</th>
+          <th style="text-align: center;">MEDICAÇÃO</th>
+          <th style="text-align: center;">DOSE</th>
+          <th style="text-align: center;">VIA</th>
+          <th style="text-align: center;">POSOLOGIA</th>
+          <th style="text-align: center;">OBS.</th>
+          <th style="text-align: center;">HORÁRIO</th>
+        </tr>
+        ${prescriptionRows}
+        ${emptyRows}
+      </table>
       
-      <footer style="margin-top: 30px; text-align: center; font-size: 0.9em; color: #777;">
+      <footer style="margin-top: 30px; font-size: 0.8em; color: #777; text-align: center;">
         <p>Documento gerado pelo QuickDoc: Pronto Médico em ${new Date().toLocaleDateString('pt-BR')}</p>
       </footer>
     </body>
