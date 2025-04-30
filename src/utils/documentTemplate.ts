@@ -1,36 +1,69 @@
 import { DocumentData } from "./documentHtmlGenerator";
-import { saveAs } from "file-saver";
-import { generateMedicalRecordHtml } from "./documentHtmlGenerator";
-const htmlDocx = require('html-docx-js');
+import PizZip from 'pizzip';
+import Docxtemplater from 'docxtemplater';
+import { saveAs } from 'file-saver';
 
 export const generateDocxFromTemplate = async (data: DocumentData) => {
   try {
-    console.log("Iniciando geração do documento...");
+    console.log("Iniciando geração do documento com template...");
     
-    // Gerar o HTML do documento
-    const htmlContent = generateMedicalRecordHtml(data);
-    console.log("HTML gerado com sucesso");
+    // Carregar o arquivo de template
+    const response = await fetch('/modelo-prescricao.docx');
+    const templateContent = await response.arrayBuffer();
     
-    // Converter HTML para DOCX
-    console.log("Convertendo para DOCX...");
-    const docx = htmlDocx.asBlob(htmlContent, {
-      orientation: 'portrait',
-      margins: { top: 720, right: 720, bottom: 720, left: 720 }
+    // Criar um novo documento usando o template
+    const zip = new PizZip(templateContent);
+    const doc = new Docxtemplater(zip, {
+      paragraphLoop: true,
+      linebreaks: true
     });
-    
-    // Salvar o arquivo
+
+    // Preparar os dados para o template
+    const templateData = {
+      nomedopaciente: data.patient.name || '',
+      idade: data.patient.age || '',
+      datainternacao: data.patient.admissionDate || '',
+      dataHoje: data.patient.currentDate || '',
+      diagnostico: data.patient.diagnosis || '',
+      alergias: data.patient.allergies || '',
+      origem: data.patient.origin || '',
+      admissao: data.medical.admission || '',
+      comorbidades: data.medical.comorbidities || '',
+      muc: data.medical.medicationReason || '',
+      examefisico: data.medical.physicalExam || '',
+      analise: data.medical.analysis || '',
+      condutas: data.medical.plans || '',
+    };
+
+    // Adicionar dados das medicações
+    for (let i = 1; i <= 18; i++) {
+      const prescription = data.prescriptions[i - 1] || {};
+      templateData[`med${i}_name`] = prescription.medication || '';
+      templateData[`med${i}_dosagem`] = prescription.dose || '';
+      templateData[`med${i}_via`] = prescription.route || '';
+      templateData[`med${i}_posologia`] = prescription.frequency || '';
+      templateData[`med${i}_obs`] = prescription.notes || '';
+    }
+
+    console.log("Dados preparados:", templateData);
+
+    // Renderizar o documento
+    doc.render(templateData);
+
+    // Gerar o documento final
+    const content = doc.getZip().generate({
+      type: 'blob',
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+
+    // Fazer o download do arquivo
     const fileName = `prontuario_${data.patient.name?.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.docx`;
-    console.log("Salvando arquivo:", fileName);
-    saveAs(docx, fileName);
+    saveAs(content, fileName);
     
     console.log("Documento gerado com sucesso!");
     return true;
   } catch (error) {
-    console.error("Erro detalhado ao gerar documento DOCX:", error);
-    if (error instanceof Error) {
-      console.error("Mensagem de erro:", error.message);
-      console.error("Stack trace:", error.stack);
-    }
+    console.error("Erro ao gerar documento:", error);
     throw error;
   }
 }; 

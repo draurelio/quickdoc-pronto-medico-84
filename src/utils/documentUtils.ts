@@ -1,4 +1,3 @@
-
 // Main document utility file - acts as an export point for document-related functions
 import { PatientData } from "../components/PatientHeader";
 import { PrescriptionItem } from "../components/PrescriptionTable";
@@ -8,4 +7,5 @@ import { MedicalFormData } from "../components/MedicalForm";
 export { formatDate } from './formatUtils';
 export type { DocumentData } from './documentHtmlGenerator';
 export { generateMedicalRecordHtml } from './documentHtmlGenerator';
-export { generateAndDownloadPdf, generateAndDownloadDocx } from './documentExport';
+export { generateAndDownloadPdf } from './documentExport';
+export { generateDocxFromTemplate as generateAndDownloadDocx } from './documentTemplate';
