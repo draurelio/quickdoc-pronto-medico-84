@@ -6,5 +6,6 @@ import { MedicalFormData } from "../components/MedicalForm";
 
 // Re-export interfaces and functions from the specialized utility files
 export { formatDate } from './formatUtils';
-export { generateMedicalRecordHtml, DocumentData } from './documentHtmlGenerator';
+export type { DocumentData } from './documentHtmlGenerator';
+export { generateMedicalRecordHtml } from './documentHtmlGenerator';
 export { generateAndDownloadPdf } from './documentExport';

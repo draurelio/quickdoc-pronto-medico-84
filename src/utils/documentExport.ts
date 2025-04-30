@@ -1,5 +1,5 @@
 
-import { DocumentData } from "./documentHtmlGenerator";
+import type { DocumentData } from "./documentHtmlGenerator";
 import { generateMedicalRecordHtml } from "./documentHtmlGenerator";
 
 // Function to generate and download PDF (using HTML to PDF conversion)
