@@ -1,10 +1,18 @@
-
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, ListPlus } from "lucide-react";
+import { v4 as uuidv4 } from 'uuid';
+import { defaultMedications } from '@/utils/defaultMedications';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface PrescriptionItem {
   id: string;
@@ -14,6 +22,13 @@ export interface PrescriptionItem {
   frequency: string;
   notes: string;
   time: string;
+  options?: {
+    medication?: string[];
+    dose?: string[];
+    route?: string[];
+    frequency?: string[];
+    notes?: string[];
+  };
 }
 
 interface PrescriptionTableProps {
@@ -33,9 +48,17 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     }
   ]);
 
+  const updateField = (id: string, field: keyof PrescriptionItem, value: string) => {
+    const updatedPrescriptions = prescriptions.map(prescription => 
+      prescription.id === id ? { ...prescription, [field]: value } : prescription
+    );
+    setPrescriptions(updatedPrescriptions);
+    onDataChange(updatedPrescriptions);
+  };
+
   const addRow = () => {
-    const newRow: PrescriptionItem = { 
-      id: Date.now().toString(), 
+    const newPrescription: PrescriptionItem = { 
+      id: uuidv4(), 
       medication: '', 
       dose: '', 
       route: '', 
@@ -43,35 +66,70 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
       notes: '', 
       time: '' 
     };
-    const updatedPrescriptions = [...prescriptions, newRow];
+    const updatedPrescriptions = [...prescriptions, newPrescription];
     setPrescriptions(updatedPrescriptions);
     onDataChange(updatedPrescriptions);
   };
 
   const removeRow = (id: string) => {
     if (prescriptions.length > 1) {
-      const updatedPrescriptions = prescriptions.filter(item => item.id !== id);
+      const updatedPrescriptions = prescriptions.filter(p => p.id !== id);
       setPrescriptions(updatedPrescriptions);
       onDataChange(updatedPrescriptions);
     }
   };
 
-  const updateField = (id: string, field: keyof PrescriptionItem, value: string) => {
-    const updatedPrescriptions = prescriptions.map(item => {
-      if (item.id === id) {
-        return { ...item, [field]: value };
-      }
-      return item;
-    });
-    
-    setPrescriptions(updatedPrescriptions);
-    onDataChange(updatedPrescriptions);
+  const addDefaultMedications = () => {
+    const defaultMedsWithIds = defaultMedications.map(med => ({
+      ...med,
+      id: uuidv4()
+    }));
+    setPrescriptions(defaultMedsWithIds);
+    onDataChange(defaultMedsWithIds);
+  };
+
+  const renderInput = (prescription: PrescriptionItem, field: keyof PrescriptionItem) => {
+    if (prescription.options?.[field]) {
+      return (
+        <Select
+          value={prescription[field] as string}
+          onValueChange={(value) => updateField(prescription.id, field, value)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={`Selecione ${field}`} />
+          </SelectTrigger>
+          <SelectContent>
+            {prescription.options[field]?.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    return (
+      <Input 
+        value={prescription[field] as string}
+        onChange={(e) => updateField(prescription.id, field, e.target.value)}
+        placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+      />
+    );
   };
 
   return (
     <Card className="mb-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl text-medblue-600">Prescrição Médica</CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl text-medblue-600">Prescrição Médica</CardTitle>
+          <Button 
+            onClick={addDefaultMedications}
+            className="bg-medblue-500 hover:bg-medblue-600"
+          >
+            <ListPlus size={16} className="mr-2" /> Medicações Padrão
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -91,46 +149,22 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
               {prescriptions.map((prescription) => (
                 <TableRow key={prescription.id}>
                   <TableCell className="p-2">
-                    <Input 
-                      value={prescription.medication} 
-                      onChange={(e) => updateField(prescription.id, 'medication', e.target.value)}
-                      placeholder="Medicamento"
-                    />
+                    {renderInput(prescription, 'medication')}
                   </TableCell>
                   <TableCell className="p-2">
-                    <Input 
-                      value={prescription.dose} 
-                      onChange={(e) => updateField(prescription.id, 'dose', e.target.value)}
-                      placeholder="Dose"
-                    />
+                    {renderInput(prescription, 'dose')}
                   </TableCell>
                   <TableCell className="p-2">
-                    <Input 
-                      value={prescription.route} 
-                      onChange={(e) => updateField(prescription.id, 'route', e.target.value)}
-                      placeholder="Via"
-                    />
+                    {renderInput(prescription, 'route')}
                   </TableCell>
                   <TableCell className="p-2">
-                    <Input 
-                      value={prescription.frequency} 
-                      onChange={(e) => updateField(prescription.id, 'frequency', e.target.value)}
-                      placeholder="Posologia"
-                    />
+                    {renderInput(prescription, 'frequency')}
                   </TableCell>
                   <TableCell className="p-2">
-                    <Input 
-                      value={prescription.notes} 
-                      onChange={(e) => updateField(prescription.id, 'notes', e.target.value)}
-                      placeholder="Observações"
-                    />
+                    {renderInput(prescription, 'notes')}
                   </TableCell>
                   <TableCell className="p-2">
-                    <Input 
-                      value={prescription.time} 
-                      onChange={(e) => updateField(prescription.id, 'time', e.target.value)}
-                      placeholder="Horário"
-                    />
+                    {renderInput(prescription, 'time')}
                   </TableCell>
                   <TableCell className="p-2">
                     <Button 
