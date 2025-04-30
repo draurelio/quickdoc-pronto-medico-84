@@ -43,7 +43,10 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-medblue-600 text-white py-4 px-6 shadow-md sticky top-0 z-10">
         <div className="container flex justify-between items-center">
-          <h1 className="text-2xl font-bold">QuickDoc: Pronto Médico</h1>
+          <div className="flex items-center gap-3">
+            <img src="/lovable-uploads/hospital-logo.png" alt="Hospital Logo" className="h-10" />
+            <h1 className="text-2xl font-bold">QuickDoc: Pronto Médico</h1>
+          </div>
           <div className="text-sm hidden md:block">Sistema de Prontuário Médico Digital</div>
         </div>
       </header>

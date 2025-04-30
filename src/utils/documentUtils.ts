@@ -8,4 +8,4 @@ import { MedicalFormData } from "../components/MedicalForm";
 export { formatDate } from './formatUtils';
 export type { DocumentData } from './documentHtmlGenerator';
 export { generateMedicalRecordHtml } from './documentHtmlGenerator';
-export { generateAndDownloadPdf } from './documentExport';
+export { generateAndDownloadPdf, generateAndDownloadDocx } from './documentExport';
