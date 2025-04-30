@@ -1,12 +1,75 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import PatientHeader, { PatientData } from '@/components/PatientHeader';
+import PrescriptionTable, { PrescriptionItem } from '@/components/PrescriptionTable';
+import MedicalForm, { MedicalFormData } from '@/components/MedicalForm';
+import DocumentGenerator from '@/components/DocumentGenerator';
+import { Toaster } from "@/components/ui/toaster";
 
 const Index = () => {
+  const [patientData, setPatientData] = useState<PatientData>({
+    name: '',
+    age: '',
+    admissionDate: '',
+    currentDate: new Date().toISOString().split('T')[0],
+    diagnosis: '',
+    allergies: '',
+    origin: '',
+  });
+
+  const [prescriptionData, setPrescriptionData] = useState<PrescriptionItem[]>([
+    { 
+      id: '1', 
+      medication: '', 
+      dose: '', 
+      route: '', 
+      frequency: '', 
+      notes: '', 
+      time: '' 
+    }
+  ]);
+
+  const [medicalData, setMedicalData] = useState<MedicalFormData>({
+    admission: '',
+    comorbidities: '',
+    medicationReason: '',
+    physicalExam: '',
+    analysis: '',
+    plans: '',
+  });
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-medblue-600 text-white py-4 px-6 shadow-md sticky top-0 z-10">
+        <div className="container flex justify-between items-center">
+          <h1 className="text-2xl font-bold">QuickDoc: Pronto Médico</h1>
+          <div className="text-sm hidden md:block">Sistema de Prontuário Médico Digital</div>
+        </div>
+      </header>
+      
+      <ScrollArea className="h-screen">
+        <main className="container py-6 px-4 mb-20">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <PatientHeader onDataChange={setPatientData} />
+            <PrescriptionTable onDataChange={setPrescriptionData} />
+            <MedicalForm onDataChange={setMedicalData} />
+            <DocumentGenerator 
+              patientData={patientData} 
+              prescriptionData={prescriptionData} 
+              medicalData={medicalData} 
+            />
+          </div>
+        </main>
+      </ScrollArea>
+      
+      <footer className="bg-gray-100 border-t py-4 px-6 text-center text-sm text-gray-600">
+        <div className="container">
+          QuickDoc: Pronto Médico &copy; {new Date().getFullYear()} - Sistema de Prontuário Médico Digital
+        </div>
+      </footer>
+      
+      <Toaster />
     </div>
   );
 };

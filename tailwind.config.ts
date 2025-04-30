@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -12,7 +13,7 @@ export default {
 	theme: {
 		container: {
 			center: true,
-			padding: '2rem',
+			padding: '1rem',
 			screens: {
 				'2xl': '1400px'
 			}
@@ -24,6 +25,19 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				medblue: {
+					DEFAULT: '#0A6ED1',
+					50: '#E5F2FF',
+					100: '#CCE4FF',
+					200: '#99C9FF',
+					300: '#66AEFE',
+					400: '#3393FE',
+					500: '#0A6ED1',
+					600: '#0858A8',
+					700: '#06427F',
+					800: '#042C56',
+					900: '#02162D',
+				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -89,6 +103,9 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
+			},
+			fontFamily: {
+				inter: ['Inter', 'sans-serif'],
 			}
 		}
 	},
