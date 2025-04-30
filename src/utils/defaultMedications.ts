@@ -2,14 +2,14 @@ import { PrescriptionItem } from "@/components/PrescriptionTable";
 
 export const defaultMedications: Omit<PrescriptionItem, 'id'>[] = [
   {
-    medication: 'DIETA',
+    medication: 'DIETA LIVRE',
     dose: '',
     route: 'ORAL',
     frequency: '8/8H',
     notes: '',
     time: '',
     options: {
-      medication: ['LIVRE', 'SNG', 'SNE', 'JEJUM']
+      medication: ['DIETA LIVRE', 'DIETA SNG', 'DIETA SNE', 'JEJUM']
     }
   },
   {

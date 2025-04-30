@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -71,7 +70,7 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
             
             <div>
               <Label htmlFor="medicationReason" className="text-sm font-medium mb-1 block">
-                MUC (Motivo do uso da medicação)
+                MUC (Medicação de uso contínuo)
               </Label>
               <Textarea 
                 id="medicationReason"

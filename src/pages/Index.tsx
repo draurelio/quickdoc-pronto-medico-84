@@ -40,13 +40,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-medblue-600 text-white py-4 px-6 shadow-md sticky top-0 z-10">
-        <div className="container flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <img src="/lovable-uploads/hospital-logo.png" alt="Hospital Logo" className="h-10" />
-            <h1 className="text-2xl font-bold">QuickDoc: Pronto Médico</h1>
-          </div>
-          <div className="text-sm hidden md:block">Sistema de Prontuário Médico Digital</div>
+      <header className="bg-medblue-600 text-white py-2 px-6 shadow-md sticky top-0 z-10">
+        <div className="container flex items-center">
+          <img src="/lovable-uploads/hospital-logo.png" alt="Hospital Dr. Aurélio" className="h-14 mr-4" />
+          <h1 className="text-2xl font-bold">QuickDoc: Prontuário Médico Hospital Dr. Aurélio</h1>
         </div>
       </header>
       
@@ -67,7 +64,7 @@ const Index = () => {
       
       <footer className="bg-gray-100 border-t py-4 px-6 text-center text-sm text-gray-600">
         <div className="container">
-          QuickDoc: Pronto Médico &copy; {new Date().getFullYear()} - Sistema de Prontuário Médico Digital
+          QuickDoc: Prontuário Médico Hospital Dr. Aurélio &copy; {new Date().getFullYear()} - Sistema de Prontuário Médico Digital
         </div>
       </footer>
       

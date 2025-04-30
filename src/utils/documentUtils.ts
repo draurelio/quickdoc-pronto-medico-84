@@ -8,4 +8,5 @@ export { formatDate } from './formatUtils';
 export type { DocumentData } from './documentHtmlGenerator';
 export { generateMedicalRecordHtml } from './documentHtmlGenerator';
 export { generateAndDownloadPdf } from './documentExport';
-export { generateDocxFromTemplate as generateAndDownloadDocx } from './documentTemplate';
+export { generateAndDownloadDocx } from './documentExport';
+export { generateDocxFromTemplate } from './documentTemplate';
