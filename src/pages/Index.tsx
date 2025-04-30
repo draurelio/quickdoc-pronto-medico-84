@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PatientHeader, { PatientData } from '@/components/PatientHeader';
@@ -55,8 +54,8 @@ const Index = () => {
         <main className="container py-6 px-4 mb-20">
           <div className="max-w-6xl mx-auto space-y-6">
             <PatientHeader onDataChange={setPatientData} />
-            <PrescriptionTable onDataChange={setPrescriptionData} />
             <MedicalForm onDataChange={setMedicalData} />
+            <PrescriptionTable onDataChange={setPrescriptionData} />
             <DocumentGenerator 
               patientData={patientData} 
               prescriptionData={prescriptionData} 
