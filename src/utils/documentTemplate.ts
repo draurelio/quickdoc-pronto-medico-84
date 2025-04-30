@@ -38,7 +38,7 @@ export const generateDocxFromTemplate = async (data: DocumentData) => {
     // Adicionar dados das medicações
     for (let i = 1; i <= 18; i++) {
       const prescription = data.prescriptions[i - 1] || {};
-      templateData[`med${i}_name`] = prescription.medication || '';
+      templateData[`med${i}_nome`] = prescription.medication || '';
       templateData[`med${i}_dosagem`] = prescription.dose || '';
       templateData[`med${i}_via`] = prescription.route || '';
       templateData[`med${i}_posologia`] = prescription.frequency || '';
