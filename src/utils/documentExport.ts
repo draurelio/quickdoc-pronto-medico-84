@@ -1,302 +1,267 @@
-import type { DocumentData } from "./documentHtmlGenerator";
-import { generateMedicalRecordHtml } from "./documentHtmlGenerator";
-import { generateDocxFromTemplate } from "./documentTemplate";
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, BorderStyle, WidthType, AlignmentType } from "docx";
 
-// Function to generate and download PDF (using HTML to PDF conversion)
-export const generateAndDownloadPdf = (data: DocumentData) => {
-  const htmlContent = generateMedicalRecordHtml(data);
+import { saveAs } from 'file-saver';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import html2pdf from 'html2pdf.js';
+import { generateMedicalRecordHtml } from './documentHtmlGenerator';
+import { PatientData } from '@/components/PatientHeader';
+import { PrescriptionItem } from '@/components/PrescriptionTable';
+import { MedicalFormData } from '@/components/MedicalForm';
+import { generateDocxFromTemplate } from './documentTemplate';
+
+/**
+ * Generates and downloads a PDF file from HTML content
+ */
+export const generateAndDownloadPdf = (
+  patientData: PatientData,
+  prescriptionData: PrescriptionItem[],
+  medicalData: MedicalFormData
+): void => {
+  const htmlContent = generateMedicalRecordHtml(patientData, prescriptionData, medicalData);
   
-  // Create a Blob with the HTML content
-  const blob = new Blob([htmlContent], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  
-  // Create a link element
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `prontuario_${data.patient.name?.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.html`;
-  
-  // Append the link to the document
-  document.body.appendChild(link);
-  
-  // Click the link to trigger the download
-  link.click();
-  
-  // Clean up
-  URL.revokeObjectURL(url);
-  document.body.removeChild(link);
+  const element = document.createElement('div');
+  element.innerHTML = htmlContent;
+  document.body.appendChild(element);
+
+  const options = {
+    margin: 10,
+    filename: `prontuario_${patientData.name.toLowerCase().replace(/\s+/g, '_')}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(options).from(element).save().then(() => {
+    document.body.removeChild(element);
+  });
 };
 
-// Function to generate and download DOCX
-export const generateAndDownloadDocx = async (data: DocumentData) => {
-  try {
-    console.log("Iniciando geração do DOCX...");
-    const { patient, prescriptions, medical } = data;
-    console.log("Dados recebidos:", { patient, prescriptions, medical });
-    
-    // Create document
-    const doc = new Document({
-      sections: [{
-        properties: {},
-        children: [
-          // Header with title
-          new Paragraph({
-            text: "PRONTUÁRIO MÉDICO",
-            heading: HeadingLevel.HEADING_1,
-            alignment: AlignmentType.CENTER,
-          }),
-          
-          // Patient information table
-          new Table({
-            width: {
-              size: 100,
-              type: WidthType.PERCENTAGE,
-            },
-            rows: [
-              new TableRow({
-                children: [
-                  new TableCell({
-                    children: [new Paragraph({ text: `NOME: ${patient.name || ''}` })],
-                    width: {
-                      size: 50,
-                      type: WidthType.PERCENTAGE,
-                    },
-                  }),
-                  new TableCell({
-                    children: [new Paragraph({ text: `IDADE: ${patient.age || ''} ANOS` })],
-                    width: {
-                      size: 20,
-                      type: WidthType.PERCENTAGE,
-                    },
-                  }),
-                  new TableCell({
-                    children: [new Paragraph({ text: `DIH: ${patient.admissionDate || ''}` })],
-                    width: {
-                      size: 30,
-                      type: WidthType.PERCENTAGE,
-                    },
-                  }),
-                ],
+/**
+ * Generates and downloads a DOCX file
+ */
+export const generateAndDownloadDocx = (
+  patientData: PatientData,
+  prescriptionData: PrescriptionItem[],
+  medicalData: MedicalFormData
+): void => {
+  // Create a new document
+  const doc = new Document({
+    sections: [{
+      properties: {},
+      children: [
+        // Header with hospital name
+        new Paragraph({
+          text: "Hospital Dr. Aurélio",
+          heading: HeadingLevel.HEADING_1,
+          alignment: AlignmentType.CENTER,
+          spacing: {
+            after: 200
+          },
+        }),
+
+        // Patient information section
+        new Paragraph({
+          text: "INFORMAÇÕES DO PACIENTE",
+          heading: HeadingLevel.HEADING_2,
+          alignment: AlignmentType.LEFT,
+          spacing: {
+            before: 200,
+            after: 100
+          }
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Nome: ",
+              bold: true,
+            }),
+            new TextRun(patientData.name || "Não informado")
+          ]
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Idade: ",
+              bold: true,
+            }),
+            new TextRun(patientData.age || "Não informada")
+          ]
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Data de Admissão: ",
+              bold: true,
+            }),
+            new TextRun(patientData.admissionDate || "Não informada")
+          ]
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Diagnóstico: ",
+              bold: true,
+            }),
+            new TextRun(patientData.diagnosis || "Não informado")
+          ]
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Alergias: ",
+              bold: true,
+            }),
+            new TextRun(patientData.allergies || "Nenhuma informada")
+          ]
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Procedência: ",
+              bold: true,
+            }),
+            new TextRun(patientData.origin || "Não informada")
+          ],
+          spacing: {
+            after: 200
+          }
+        }),
+
+        // Medical information section
+        new Paragraph({
+          text: "AVALIAÇÃO MÉDICA",
+          heading: HeadingLevel.HEADING_2,
+          alignment: AlignmentType.LEFT,
+          spacing: {
+            before: 200,
+            after: 100
+          }
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "História da Doença Atual: ",
+              bold: true,
+            }),
+            new TextRun(medicalData.admission || "Não informada")
+          ],
+          spacing: {
+            after: 100
+          }
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Comorbidades: ",
+              bold: true,
+            }),
+            new TextRun(medicalData.comorbidities || "Nenhuma informada")
+          ],
+          spacing: {
+            after: 100
+          }
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Exame Físico: ",
+              bold: true,
+            }),
+            new TextRun(medicalData.physicalExam || "Não informado")
+          ],
+          spacing: {
+            after: 100
+          }
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Análise: ",
+              bold: true,
+            }),
+            new TextRun(medicalData.analysis || "Não informada")
+          ],
+          spacing: {
+            after: 100
+          }
+        }),
+
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Planos: ",
+              bold: true,
+            }),
+            new TextRun(medicalData.plans || "Não informados")
+          ],
+          spacing: {
+            after: 200
+          }
+        }),
+
+        // Prescription section
+        new Paragraph({
+          text: "PRESCRIÇÃO MÉDICA",
+          heading: HeadingLevel.HEADING_2,
+          alignment: AlignmentType.LEFT,
+          spacing: {
+            before: 200,
+            after: 100
+          }
+        }),
+
+        // Add each prescription item
+        ...prescriptionData.map((item) => {
+          return new Paragraph({
+            children: [
+              new TextRun({
+                text: `${item.medication || "Medicamento não informado"} - `,
               }),
-              new TableRow({
-                children: [
-                  new TableCell({
-                    children: [new Paragraph({ text: `DIAGNÓSTICO: ${patient.diagnosis || ''}` })],
-                  }),
-                  new TableCell({
-                    children: [new Paragraph({ text: `ALERGIAS: ${patient.allergies || ''}` })],
-                  }),
-                  new TableCell({
-                    children: [new Paragraph({ text: `ORIGEM: ${patient.origin || ''}` })],
-                  }),
-                ],
+              new TextRun({
+                text: `${item.dose || "Dose não informada"}, `,
+              }),
+              new TextRun({
+                text: `${item.route || "Via não informada"}, `,
+              }),
+              new TextRun({
+                text: `${item.frequency || "Frequência não informada"} `,
+              }),
+              new TextRun({
+                text: `(${item.time || "Horário não informado"})`,
+              }),
+              new TextRun({
+                text: item.notes ? ` - ${item.notes}` : "",
               }),
             ],
-          }),
-          
-          // Medical information
-          new Paragraph({
-            text: "ADMISSÃO MÉDICA",
-            heading: HeadingLevel.HEADING_2,
             spacing: {
-              before: 400,
-            },
-          }),
-          
-          new Paragraph({ 
-            text: "ADMISSÃO:", 
-            children: [new TextRun({ text: "ADMISSÃO:", bold: true })],
-            spacing: {
-              after: 100,
-            },
-          }),
-          new Paragraph({ 
-            text: medical.admission || '',
-            spacing: {
-              after: 200,
-            },
-          }),
-          
-          new Paragraph({ 
-            text: "COMORBIDADES:", 
-            children: [new TextRun({ text: "COMORBIDADES:", bold: true })],
-            spacing: {
-              after: 100,
-            },
-          }),
-          new Paragraph({ 
-            text: medical.comorbidities || '',
-            spacing: {
-              after: 200,
-            },
-          }),
-          
-          new Paragraph({ 
-            text: "MUC (MEDICAÇÃO EM USO CONTÍNUO):", 
-            children: [new TextRun({ text: "MUC (MEDICAÇÃO EM USO CONTÍNUO):", bold: true })],
-            spacing: {
-              after: 100,
-            },
-          }),
-          new Paragraph({ 
-            text: medical.medicationReason || '',
-            spacing: {
-              after: 200,
-            },
-          }),
-          
-          new Paragraph({ 
-            text: "EXAME FÍSICO:", 
-            children: [new TextRun({ text: "EXAME FÍSICO:", bold: true })],
-            spacing: {
-              after: 100,
-            },
-          }),
-          new Paragraph({ 
-            text: medical.physicalExam || '',
-            spacing: {
-              after: 200,
-            },
-          }),
-          
-          new Paragraph({ 
-            text: "ANÁLISE:", 
-            children: [new TextRun({ text: "ANÁLISE:", bold: true })],
-            spacing: {
-              after: 100,
-            },
-          }),
-          new Paragraph({ 
-            text: medical.analysis || '',
-            spacing: {
-              after: 200,
-            },
-          }),
-          
-          new Paragraph({ 
-            text: "CONDUTAS:", 
-            children: [new TextRun({ text: "CONDUTAS:", bold: true })],
-            spacing: {
-              after: 100,
-            },
-          }),
-          new Paragraph({ 
-            text: medical.plans || '',
-            spacing: {
-              after: 200,
-            },
-          }),
-          
-          // Prescription table
-          new Paragraph({
-            text: "MEDICAÇÃO",
-            heading: HeadingLevel.HEADING_2,
-            spacing: {
-              before: 400,
-              after: 200,
-            },
-          }),
-          createPrescriptionTable(prescriptions),
-          
-          // Footer
-          new Paragraph({
-            text: `Documento gerado pelo QuickDoc: Pronto Médico em ${new Date().toLocaleDateString('pt-BR')}`,
-            spacing: {
-              before: 400,
-            },
-            alignment: AlignmentType.CENTER,
-          }),
-        ],
-      }],
-    });
-    
-    // Generate and download the document
-    console.log("Gerando buffer do documento...");
-    const buffer = await Packer.toBlob(doc);
-    console.log("Buffer gerado com sucesso");
-    
-    const url = URL.createObjectURL(buffer);
-    console.log("URL criada:", url);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `prontuario_${patient.name?.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.docx`;
-    console.log("Link de download criado:", link.download);
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    console.log("Download iniciado");
-  } catch (error) {
-    console.error("Erro detalhado na geração do DOCX:", error);
-    if (error instanceof Error) {
-      console.error("Mensagem:", error.message);
-      console.error("Stack:", error.stack);
-    }
-    throw error;
-  }
-};
+              after: 100
+            }
+          });
+        }),
 
-// Helper function to create the prescription table
-function createPrescriptionTable(prescriptions: DocumentData['prescriptions']) {
-  const rows = [
-    // Header row
-    new TableRow({
-      children: [
-        new TableCell({ children: [new Paragraph({ text: "#", alignment: AlignmentType.CENTER })] }),
-        new TableCell({ children: [new Paragraph({ text: "MEDICAÇÃO", alignment: AlignmentType.CENTER })] }),
-        new TableCell({ children: [new Paragraph({ text: "DOSE", alignment: AlignmentType.CENTER })] }),
-        new TableCell({ children: [new Paragraph({ text: "VIA", alignment: AlignmentType.CENTER })] }),
-        new TableCell({ children: [new Paragraph({ text: "POSOLOGIA", alignment: AlignmentType.CENTER })] }),
-        new TableCell({ children: [new Paragraph({ text: "OBS.", alignment: AlignmentType.CENTER })] }),
-        new TableCell({ children: [new Paragraph({ text: "HORÁRIO", alignment: AlignmentType.CENTER })] }),
-      ],
-      tableHeader: true,
-    }),
-  ];
-  
-  // Add rows for each prescription
-  prescriptions.forEach((prescription, index) => {
-    rows.push(
-      new TableRow({
-        children: [
-          new TableCell({ children: [new Paragraph({ text: (index + 1).toString(), alignment: AlignmentType.CENTER })] }),
-          new TableCell({ children: [new Paragraph({ text: prescription.medication || '' })] }),
-          new TableCell({ children: [new Paragraph({ text: prescription.dose || '' })] }),
-          new TableCell({ children: [new Paragraph({ text: prescription.route || '' })] }),
-          new TableCell({ children: [new Paragraph({ text: prescription.frequency || '' })] }),
-          new TableCell({ children: [new Paragraph({ text: prescription.notes || '' })] }),
-          new TableCell({ children: [new Paragraph({ text: prescription.time || '' })] }),
-        ],
-      })
-    );
+        // Footer with date
+        new Paragraph({
+          text: `Data: ${patientData.currentDate || new Date().toISOString().split('T')[0]}`,
+          alignment: AlignmentType.RIGHT,
+          spacing: {
+            before: 400
+          }
+        }),
+      ]
+    }]
   });
-  
-  // Add empty rows if needed (to get 18 rows total)
-  const emptyRowsNeeded = Math.max(0, 18 - prescriptions.length);
-  for (let i = 0; i < emptyRowsNeeded; i++) {
-    const rowIndex = prescriptions.length + i + 1;
-    rows.push(
-      new TableRow({
-        children: [
-          new TableCell({ children: [new Paragraph({ text: rowIndex.toString(), alignment: AlignmentType.CENTER })] }),
-          new TableCell({ children: [new Paragraph()] }),
-          new TableCell({ children: [new Paragraph()] }),
-          new TableCell({ children: [new Paragraph()] }),
-          new TableCell({ children: [new Paragraph()] }),
-          new TableCell({ children: [new Paragraph()] }),
-          new TableCell({ children: [new Paragraph()] }),
-        ],
-      })
-    );
-  }
-  
-  return new Table({
-    width: {
-      size: 100,
-      type: WidthType.PERCENTAGE,
-    },
-    rows,
+
+  // Generate and save the docx file
+  Packer.toBlob(doc).then(blob => {
+    saveAs(blob, `prontuario_${patientData.name.toLowerCase().replace(/\s+/g, '_')}.docx`);
   });
-}
+};
