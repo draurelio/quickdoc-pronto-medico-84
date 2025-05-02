@@ -42,14 +42,20 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="header-gradient text-white py-3 px-6 shadow-md sticky top-0 z-10">
+      <header className="bg-gradient-to-r from-medblue-700 via-medblue-600 to-medblue-500 text-white py-4 px-6 shadow-lg sticky top-0 z-10">
         <div className="container flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <img src="/lovable-uploads/hospital-logo.png" alt="Hospital Dr. Aurélio" className="h-14" />
-            <h1 className="text-2xl font-bold">QuickDoc: Prontuário Médico</h1>
+            <div className="p-1.5 bg-white/20 rounded-lg shadow-inner backdrop-blur-sm">
+              <img src="/lovable-uploads/hospital-logo.png" alt="Hospital Dr. Aurélio" className="h-14 filter drop-shadow-md" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold drop-shadow-sm">QuickDoc: Prontuário Médico</h1>
+              <p className="text-sm text-white/90 font-medium">Sistema Integrado de Gerenciamento Médico</p>
+            </div>
           </div>
-          <div className="text-sm text-white/80">
-            Hospital Dr. Aurélio
+          <div className="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm py-2 px-4 rounded-full shadow-inner">
+            <span className="text-sm font-semibold text-white">Hospital Dr. Aurélio</span>
+            <span className="inline-block h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
           </div>
         </div>
       </header>
@@ -57,7 +63,7 @@ const Index = () => {
       <ScrollArea className="h-screen">
         <main className="container py-8 px-4 mb-20">
           <div className="max-w-6xl mx-auto space-y-8">
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
               <div className="bg-gradient-to-r from-medblue-100 to-medblue-50 p-4">
                 <h2 className="text-lg font-semibold text-medblue-800">Dados do Paciente</h2>
               </div>
@@ -66,7 +72,7 @@ const Index = () => {
               </CardContent>
             </Card>
             
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
               <div className="bg-gradient-to-r from-medblue-100 to-medblue-50 p-4">
                 <h2 className="text-lg font-semibold text-medblue-800">Avaliação Médica</h2>
               </div>
@@ -75,7 +81,7 @@ const Index = () => {
               </CardContent>
             </Card>
             
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
               <div className="bg-gradient-to-r from-medblue-100 to-medblue-50 p-4">
                 <h2 className="text-lg font-semibold text-medblue-800">Prescrição Médica</h2>
               </div>
@@ -84,7 +90,7 @@ const Index = () => {
               </CardContent>
             </Card>
             
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
               <div className="bg-gradient-to-r from-medblue-100 to-medblue-50 p-4">
                 <h2 className="text-lg font-semibold text-medblue-800">Gerar Documentação</h2>
               </div>

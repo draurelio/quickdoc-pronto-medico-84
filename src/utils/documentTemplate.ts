@@ -1,3 +1,4 @@
+
 import { DocumentData } from "./documentHtmlGenerator";
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
@@ -37,7 +38,14 @@ export const generateDocxFromTemplate = async (data: DocumentData) => {
 
     // Adicionar dados das medicações
     for (let i = 1; i <= 18; i++) {
-      const prescription = data.prescriptions[i - 1] || {};
+      const prescription = data.prescriptions[i - 1] || { 
+        medication: '',
+        dose: '',
+        route: '',
+        frequency: '',
+        notes: ''
+      };
+      
       templateData[`med${i}_nome`] = prescription.medication || '';
       templateData[`med${i}_dosagem`] = prescription.dose || '';
       templateData[`med${i}_via`] = prescription.route || '';
