@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { PatientData } from "./PatientHeader";
@@ -39,11 +40,13 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
       console.log("Dados da prescrição:", prescriptionData);
       console.log("Dados médicos:", medicalData);
       
-      await generateAndDownloadDocx({
-        patient: patientData,
-        prescriptions: prescriptionData,
-        medical: medicalData,
-      });
+      await generateAndDownloadDocx(
+        {
+          patient: patientData,
+          prescriptions: prescriptionData,
+          medical: medicalData,
+        }
+      );
       
       toast({
         title: "Sucesso!",
