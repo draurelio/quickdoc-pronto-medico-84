@@ -6,7 +6,7 @@ import { PrescriptionItem } from "./PrescriptionTable";
 import { MedicalFormData } from "./MedicalForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { generateAndDownloadDocx } from "../utils/documentUtils";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { FileText } from "lucide-react";
 
 interface DocumentGeneratorProps {
@@ -40,13 +40,13 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
       console.log("Dados da prescrição:", prescriptionData);
       console.log("Dados médicos:", medicalData);
       
-      await generateAndDownloadDocx(
-        {
-          patient: patientData,
-          prescriptions: prescriptionData,
-          medical: medicalData,
-        }
-      );
+      const documentData = {
+        patient: patientData,
+        prescriptions: prescriptionData,
+        medical: medicalData,
+      };
+      
+      await generateAndDownloadDocx(documentData);
       
       toast({
         title: "Sucesso!",

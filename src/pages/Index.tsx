@@ -1,11 +1,9 @@
-
 import React, { useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PatientHeader, { PatientData } from '@/components/PatientHeader';
 import PrescriptionTable, { PrescriptionItem } from '@/components/PrescriptionTable';
 import MedicalForm, { MedicalFormData } from '@/components/MedicalForm';
 import DocumentGenerator from '@/components/DocumentGenerator';
-import { Toaster } from "@/components/ui/toaster";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/AuthContext';
@@ -135,8 +133,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-      
-      <Toaster />
     </div>
   );
 };
