@@ -1,16 +1,14 @@
+
 import React, { useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PatientHeader, { PatientData } from '@/components/PatientHeader';
 import PrescriptionTable, { PrescriptionItem } from '@/components/PrescriptionTable';
 import MedicalForm, { MedicalFormData } from '@/components/MedicalForm';
 import DocumentGenerator from '@/components/DocumentGenerator';
+import { Toaster } from "@/components/ui/toaster";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User } from 'lucide-react';
 
 const Index = () => {
-  const { user, signOut } = useAuth();
   const [patientData, setPatientData] = useState<PatientData>({
     name: '',
     age: '',
@@ -55,21 +53,9 @@ const Index = () => {
               <p className="text-sm text-white/90 font-medium">Sistema Integrado de Gerenciamento Médico</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm py-2 px-4 rounded-full shadow-inner">
-              <User size={16} />
-              <span className="text-sm font-semibold text-white">{user?.email}</span>
-              <span className="inline-block h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-white/10 text-white hover:bg-white/20 border-transparent"
-              onClick={() => signOut()}
-            >
-              <LogOut size={16} className="mr-2" />
-              <span>Sair</span>
-            </Button>
+          <div className="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm py-2 px-4 rounded-full shadow-inner">
+            <span className="text-sm font-semibold text-white">Hospital Dr. Aurélio</span>
+            <span className="inline-block h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
           </div>
         </div>
       </header>
@@ -133,6 +119,8 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      
+      <Toaster />
     </div>
   );
 };

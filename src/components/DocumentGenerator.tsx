@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { PatientData } from "./PatientHeader";
@@ -6,7 +5,7 @@ import { PrescriptionItem } from "./PrescriptionTable";
 import { MedicalFormData } from "./MedicalForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { generateAndDownloadDocx } from "../utils/documentUtils";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { FileText } from "lucide-react";
 
 interface DocumentGeneratorProps {
@@ -40,13 +39,11 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
       console.log("Dados da prescrição:", prescriptionData);
       console.log("Dados médicos:", medicalData);
       
-      const documentData = {
+      await generateAndDownloadDocx({
         patient: patientData,
         prescriptions: prescriptionData,
         medical: medicalData,
-      };
-      
-      await generateAndDownloadDocx(documentData);
+      });
       
       toast({
         title: "Sucesso!",
