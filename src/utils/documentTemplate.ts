@@ -1,8 +1,8 @@
-
 import { DocumentData } from "./documentHtmlGenerator";
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 import { saveAs } from 'file-saver';
+import { formatDate } from './formatUtils';
 
 export const generateDocxFromTemplate = async (data: DocumentData) => {
   try {
@@ -23,8 +23,8 @@ export const generateDocxFromTemplate = async (data: DocumentData) => {
     const templateData = {
       nomedopaciente: data.patient.name || '',
       idade: data.patient.age || '',
-      datainternacao: data.patient.admissionDate || '',
-      dataHoje: data.patient.currentDate || '',
+      datainternacao: formatDate(data.patient.admissionDate) || '',
+      dataHoje: formatDate(data.patient.currentDate) || '',
       diagnostico: data.patient.diagnosis || '',
       alergias: data.patient.allergies || '',
       origem: data.patient.origin || '',
@@ -65,7 +65,7 @@ export const generateDocxFromTemplate = async (data: DocumentData) => {
     });
 
     // Fazer o download do arquivo
-    const fileName = `prontuario_${data.patient.name?.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.docx`;
+    const fileName = `prontuario_${data.patient.name?.replace(/\s+/g, '_')}_${formatDate(new Date().toISOString().slice(0, 10))}.docx`;
     saveAs(content, fileName);
     
     console.log("Documento gerado com sucesso!");

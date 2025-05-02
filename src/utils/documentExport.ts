@@ -1,12 +1,12 @@
-
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import html2pdf from 'html2pdf.js';
-import { generateMedicalRecordHtml } from './documentHtmlGenerator';
+import { generateMedicalRecordHtml, DocumentData } from './documentHtmlGenerator';
 import { PatientData } from '@/components/PatientHeader';
 import { PrescriptionItem } from '@/components/PrescriptionTable';
 import { MedicalFormData } from '@/components/MedicalForm';
 import { generateDocxFromTemplate } from './documentTemplate';
+import { formatDate } from './formatUtils';
 
 /**
  * Generates and downloads a PDF file from HTML content
@@ -16,7 +16,13 @@ export const generateAndDownloadPdf = (
   prescriptionData: PrescriptionItem[],
   medicalData: MedicalFormData
 ): void => {
-  const htmlContent = generateMedicalRecordHtml(patientData, prescriptionData, medicalData);
+  const documentData: DocumentData = {
+    patient: patientData,
+    prescriptions: prescriptionData,
+    medical: medicalData
+  };
+  
+  const htmlContent = generateMedicalRecordHtml(documentData);
   
   const element = document.createElement('div');
   element.innerHTML = htmlContent;
@@ -95,7 +101,7 @@ export const generateAndDownloadDocx = (
               text: "Data de Admissão: ",
               bold: true,
             }),
-            new TextRun(patientData.admissionDate || "Não informada")
+            new TextRun(formatDate(patientData.admissionDate) || "Não informada")
           ]
         }),
 
@@ -250,7 +256,7 @@ export const generateAndDownloadDocx = (
 
         // Footer with date
         new Paragraph({
-          text: `Data: ${patientData.currentDate || new Date().toISOString().split('T')[0]}`,
+          text: `Data: ${formatDate(patientData.currentDate) || formatDate(new Date().toISOString().split('T')[0])}`,
           alignment: AlignmentType.RIGHT,
           spacing: {
             before: 400
