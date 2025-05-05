@@ -14,6 +14,7 @@ const InjectableModal: React.FC<InjectableModalProps> = ({ isOpen, onClose, onAd
   const [selectedRoute, setSelectedRoute] = useState<string>('');
   const [selectedPosology, setSelectedPosology] = useState<string>('');
   const [selectedSchedule, setSelectedSchedule] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleMedicationSelect = (medication: InjectableMedication) => {
     setSelectedMedication(medication);
@@ -37,6 +38,10 @@ const InjectableModal: React.FC<InjectableModalProps> = ({ isOpen, onClose, onAd
     }
   };
 
+  const filteredMedications = injectableMedications.filter((medication) =>
+    medication.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -52,12 +57,22 @@ const InjectableModal: React.FC<InjectableModalProps> = ({ isOpen, onClose, onAd
           </button>
         </div>
 
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Buscar injetável..."
+            className="w-full p-2 border rounded"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-4">
             <div className="border rounded-lg p-4">
               <h3 className="font-bold mb-2">LISTA DE INJETÁVEIS</h3>
               <div className="max-h-96 overflow-y-auto">
-                {injectableMedications.map((medication) => (
+                {filteredMedications.map((medication) => (
                   <div
                     key={medication.id}
                     className={`p-2 cursor-pointer hover:bg-gray-100 ${
@@ -68,6 +83,9 @@ const InjectableModal: React.FC<InjectableModalProps> = ({ isOpen, onClose, onAd
                     {medication.name}
                   </div>
                 ))}
+                {filteredMedications.length === 0 && (
+                  <div className="text-gray-500 text-center py-4">Nenhum injetável encontrado.</div>
+                )}
               </div>
             </div>
           </div>

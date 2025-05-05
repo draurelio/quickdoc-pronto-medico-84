@@ -1,14 +1,15 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody } from "@/components/ui/table";
 import { v4 as uuidv4 } from 'uuid';
-import { Antibiotic } from '../data/antibioticsData';
+import { OralMedication } from '../data/antibioticsData';
 import AntibioticsModal from './AntibioticsModal';
 import PrescriptionTableHeader from './prescriptions/PrescriptionTableHeader';
 import PrescriptionTableRow from './prescriptions/PrescriptionTableRow';
 import DefaultMedicationsButton from './prescriptions/DefaultMedicationsButton';
 import PrescriptionActions from './prescriptions/PrescriptionActions';
+import InjectableModal from './InjectableModal';
+import { InjectableMedication } from '../data/injectablesData';
 
 export interface PrescriptionItem {
   id: string;
@@ -44,6 +45,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     }
   ]);
   const [isAntibioticsModalOpen, setIsAntibioticsModalOpen] = useState(false);
+  const [isInjectableModalOpen, setIsInjectableModalOpen] = useState(false);
 
   const updateField = (id: string, field: keyof PrescriptionItem, value: string) => {
     const upperValue = value.toUpperCase();
@@ -92,7 +94,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     onDataChange(defaultMeds);
   };
 
-  const handleAddAntibiotic = (antibiotic: Antibiotic) => {
+  const handleAddAntibiotic = (antibiotic: OralMedication) => {
     const newPrescription: PrescriptionItem = {
       id: uuidv4(),
       medication: safeToUpperCase(antibiotic.name),
@@ -106,6 +108,22 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     setPrescriptions(updatedPrescriptions);
     onDataChange(updatedPrescriptions);
     setIsAntibioticsModalOpen(false);
+  };
+
+  const handleAddInjectable = (medication: InjectableMedication) => {
+    const newPrescription: PrescriptionItem = {
+      id: uuidv4(),
+      medication: safeToUpperCase(medication.name),
+      dose: safeToUpperCase(medication.dosage),
+      route: safeToUpperCase(medication.route),
+      frequency: safeToUpperCase(medication.posology),
+      notes: safeToUpperCase(medication.observation),
+      time: safeToUpperCase(medication.schedule)
+    };
+    const updatedPrescriptions = [...prescriptions, newPrescription];
+    setPrescriptions(updatedPrescriptions);
+    onDataChange(updatedPrescriptions);
+    setIsInjectableModalOpen(false);
   };
 
   return (
@@ -135,11 +153,17 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
         <PrescriptionActions 
           onAddRow={addRow}
           onOpenAntibioticsModal={() => setIsAntibioticsModalOpen(true)}
+          onOpenInjectablesModal={() => setIsInjectableModalOpen(true)}
         />
         <AntibioticsModal
           isOpen={isAntibioticsModalOpen}
           onClose={() => setIsAntibioticsModalOpen(false)}
           onAddAntibiotic={handleAddAntibiotic}
+        />
+        <InjectableModal
+          isOpen={isInjectableModalOpen}
+          onClose={() => setIsInjectableModalOpen(false)}
+          onAddMedication={handleAddInjectable}
         />
       </CardContent>
     </Card>

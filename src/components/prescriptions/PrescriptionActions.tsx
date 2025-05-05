@@ -7,11 +7,13 @@ import { PrescriptionItem } from '../PrescriptionTable';
 interface PrescriptionActionsProps {
   onAddRow: () => void;
   onOpenAntibioticsModal: () => void;
+  onOpenInjectablesModal: () => void;
 }
 
 const PrescriptionActions: React.FC<PrescriptionActionsProps> = ({ 
   onAddRow,
-  onOpenAntibioticsModal
+  onOpenAntibioticsModal,
+  onOpenInjectablesModal
 }) => {
   return (
     <div className="flex gap-2 mt-4">
@@ -26,6 +28,12 @@ const PrescriptionActions: React.FC<PrescriptionActionsProps> = ({
         className="bg-green-600 hover:bg-green-700"
       >
         + Comprimidos
+      </Button>
+      <Button
+        onClick={onOpenInjectablesModal}
+        className="bg-blue-600 hover:bg-blue-700 text-white"
+      >
+        + Injetáveis
       </Button>
     </div>
   );
