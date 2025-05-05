@@ -17,12 +17,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { FileText, ChevronLeft, Trash2, Eye } from 'lucide-react';
+import { FileText, ChevronLeft, Trash2, Eye, LogIn, UserRound, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { formatDate } from '@/utils/formatUtils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { generateDocxFromTemplate } from '@/utils/documentTemplate';
+import PrescriptionTableHeader from '@/components/prescriptions/PrescriptionTableHeader';
 
 interface Prescription {
   id: string;
@@ -39,26 +40,33 @@ interface Prescription {
 const PrescriptionHistory = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPrescriptions();
+    checkAuthStatus();
   }, []);
 
-  const fetchPrescriptions = async () => {
+  const checkAuthStatus = async () => {
     try {
       const { data: session } = await supabase.auth.getSession();
       
-      if (!session?.session?.user) {
-        toast({
-          title: "Acesso negado",
-          description: "Você precisa estar logado para acessar o histórico de prescrições.",
-          variant: "destructive",
-        });
-        navigate('/');
-        return;
+      if (session?.session?.user) {
+        setAuthenticated(true);
+        fetchPrescriptions();
+      } else {
+        setAuthenticated(false);
+        setLoading(false);
       }
-      
+    } catch (error) {
+      console.error('Erro ao verificar status de autenticação:', error);
+      setAuthenticated(false);
+      setLoading(false);
+    }
+  };
+
+  const fetchPrescriptions = async () => {
+    try {
       setLoading(true);
       const { data, error } = await supabase
         .from('prescriptions')
@@ -130,6 +138,52 @@ const PrescriptionHistory = () => {
     }
   };
 
+  // Render UI for unauthenticated users
+  if (authenticated === false) {
+    return (
+      <div className="container py-8 px-4">
+        <Card className="max-w-lg mx-auto">
+          <CardHeader className="bg-gradient-to-r from-red-100 to-red-50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-100 rounded-full">
+                <Lock className="h-6 w-6 text-red-500" />
+              </div>
+              <div>
+                <CardTitle className="text-xl text-red-600">Acesso negado</CardTitle>
+                <CardDescription>
+                  Você precisa estar logado para acessar o histórico de prescrições.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6 flex flex-col items-center gap-4">
+            <div className="text-center mb-4">
+              <UserRound className="h-16 w-16 mx-auto text-gray-400 mb-2" />
+              <p className="text-gray-600 mb-6">
+                Faça login para visualizar seu histórico de prescrições médicas.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/')}
+                className="flex items-center"
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
+              </Button>
+              <Button 
+                onClick={() => navigate('/login')}
+                className="flex items-center"
+              >
+                <LogIn className="mr-2 h-4 w-4" /> Fazer Login
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container py-8 px-4">
       <Card className="max-w-6xl mx-auto">
@@ -168,16 +222,7 @@ const PrescriptionHistory = () => {
           ) : (
             <ScrollArea className="h-[600px]">
               <Table>
-                <TableHeader>
-                  <TableRow className="bg-medblue-50">
-                    <TableHead className="font-medium">Paciente</TableHead>
-                    <TableHead className="font-medium">Idade</TableHead>
-                    <TableHead className="font-medium">Diagnóstico</TableHead>
-                    <TableHead className="font-medium">Data de Admissão</TableHead>
-                    <TableHead className="font-medium">Data de Criação</TableHead>
-                    <TableHead className="font-medium w-[180px] text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
+                <PrescriptionTableHeader />
                 <TableBody>
                   {prescriptions.map((prescription) => (
                     <TableRow key={prescription.id} className="hover:bg-gray-50">

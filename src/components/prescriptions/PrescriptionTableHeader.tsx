@@ -6,13 +6,12 @@ const PrescriptionTableHeader: React.FC = () => {
   return (
     <TableHeader>
       <TableRow className="bg-medblue-50">
-        <TableHead className="font-medium">Medicação</TableHead>
-        <TableHead className="font-medium">Dose</TableHead>
-        <TableHead className="font-medium">Via</TableHead>
-        <TableHead className="font-medium">Posologia</TableHead>
-        <TableHead className="font-medium">Observações</TableHead>
-        <TableHead className="font-medium">Horário</TableHead>
-        <TableHead className="w-[80px]"></TableHead>
+        <TableHead className="font-medium">Paciente</TableHead>
+        <TableHead className="font-medium">Idade</TableHead>
+        <TableHead className="font-medium">Diagnóstico</TableHead>
+        <TableHead className="font-medium">Data de Admissão</TableHead>
+        <TableHead className="font-medium">Data de Criação</TableHead>
+        <TableHead className="font-medium w-[180px] text-right">Ações</TableHead>
       </TableRow>
     </TableHeader>
   );
