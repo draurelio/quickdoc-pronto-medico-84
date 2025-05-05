@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -26,7 +25,7 @@ const PrescriptionActions: React.FC<PrescriptionActionsProps> = ({
         onClick={onOpenAntibioticsModal}
         className="bg-green-600 hover:bg-green-700"
       >
-        + Antibióticos
+        + Comprimidos
       </Button>
     </div>
   );

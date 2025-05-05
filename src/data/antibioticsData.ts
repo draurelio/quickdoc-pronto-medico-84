@@ -1,330 +1,376 @@
 import { formatDate } from '../utils/formatUtils';
 
-export interface Antibiotic {
+export interface OralMedication {
   id: string;
   name: string;
   dosage: string | string[];
-  route: string | string[];
+  route: string;
   posology: string | string[];
-  observation: string | string[];
-  schedule: string | string[];
-  type: 'injectable' | 'oral';
+  observation: string;
+  schedule: string;
 }
 
 const currentDate = formatDate(new Date().toISOString().slice(0, 10));
 
-export const injectableAntibiotics: Antibiotic[] = [
+export const oralMedications: OralMedication[] = [
   {
     id: '1',
-    name: 'BENZILPENICILINA BENZATINA',
-    dosage: ['600.000 UI', '1.200.000 UI'],
-    route: 'IM',
-    posology: 'DOSE ÚNICA',
-    observation: `IN ${currentDate}`,
-    schedule: '-',
-    type: 'injectable'
+    name: 'ÁCIDO ACETILSALICÍLICO (AAS)',
+    dosage: '100MG',
+    route: 'ORAL',
+    posology: ['1X AO DIA', '2PCP AGORA', '3CP AGORA'],
+    observation: '',
+    schedule: ''
   },
   {
     id: '2',
-    name: 'CEFTRIAXONA',
-    dosage: ['500 MG', '1 G'],
-    route: 'EV',
-    posology: ['12/12H', '24/24H'],
+    name: 'ACICLOVIR',
+    dosage: ['200MG', '400MG', '600MG', '800MG', '1000MG'],
+    route: 'ORAL',
+    posology: ['4/4H', '6/6H', '8/8H', '12/12H', '24H'],
     observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    schedule: ''
   },
   {
     id: '3',
-    name: 'METRONIDAZOL',
-    dosage: '500 MG',
-    route: 'EV',
-    posology: ['8/8H', '12/12H'],
-    observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    name: 'AMIODARONA',
+    dosage: '200MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
   },
   {
     id: '4',
-    name: 'CLINDAMICINA',
-    dosage: '600 MG',
-    route: 'IV',
-    posology: '6/6 H',
-    observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    name: 'AMINONOFILINA',
+    dosage: '100MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
   },
   {
     id: '5',
-    name: 'GENTAMICINA',
-    dosage: '40 MG/ML',
-    route: ['IV', 'IM'],
-    posology: '',
+    name: 'AMOXICILINA',
+    dosage: '500MG',
+    route: 'ORAL',
+    posology: ['8/8H', '12/12H'],
     observation: `IN ${currentDate}`,
-    schedule: 'S/N',
-    type: 'injectable'
+    schedule: ''
   },
   {
     id: '6',
-    name: 'OXACILINA',
-    dosage: '1 G',
-    route: 'IV',
-    posology: '4/4 H',
-    observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    name: 'ANLODIPINO',
+    dosage: '5MG',
+    route: 'ORAL',
+    posology: ['8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
   },
   {
     id: '7',
-    name: 'CIPROFLOXACINO',
-    dosage: '500 MG',
-    route: ['VO', 'EV'],
-    posology: '12/12 H',
-    observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    name: 'ATENOLOL',
+    dosage: ['25MG', '50MG'],
+    route: 'ORAL',
+    posology: ['8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
   },
   {
     id: '8',
-    name: 'LEVOFLOXACINO',
-    dosage: '500 MG',
-    route: 'VO',
-    posology: '24 H',
-    observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    name: 'ATORVASTATINA',
+    dosage: '100MG',
+    route: 'ORAL',
+    posology: ['24H'],
+    observation: '',
+    schedule: ''
   },
   {
     id: '9',
     name: 'AZITROMICINA',
-    dosage: '500 MG',
-    route: 'VO',
-    posology: '24 H',
+    dosage: ['500MG', '1000MG'],
+    route: 'ORAL',
+    posology: ['24H'],
     observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    schedule: ''
   },
   {
     id: '10',
-    name: 'CLARITROMICINA',
-    dosage: '500 MG',
-    route: 'EV',
-    posology: '12/12 H',
-    observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    name: 'CAPTOPRIL',
+    dosage: ['25MG', '50MG'],
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
   },
   {
     id: '11',
-    name: 'FOSFOMICINA SÓDICA',
-    dosage: '3 G',
-    route: 'EV',
-    posology: 'DOSE ÚNICA',
+    name: 'CARVEDILOL',
+    dosage: ['6,25MG', '12,5MG', '25MG'],
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
+  },
+  {
+    id: '12',
+    name: 'CEFALEXINA',
+    dosage: '500MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    schedule: ''
+  },
+  {
+    id: '13',
+    name: 'CIPROFLOXACINO',
+    dosage: '500MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: `IN ${currentDate}`,
+    schedule: ''
+  },
+  {
+    id: '14',
+    name: 'CLOPIDOGREL',
+    dosage: ['75MG', '150MG', '300MG'],
+    route: 'ORAL',
+    posology: ['AGORA', '6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
+  },
+  {
+    id: '15',
+    name: 'DABIGATRANA',
+    dosage: '150MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
+  },
+  {
+    id: '16',
+    name: 'DIGOXINA',
+    dosage: '0,25MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
+  },
+  {
+    id: '17',
+    name: 'ENALAPRIL',
+    dosage: '10MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
+  },
+  {
+    id: '18',
+    name: 'ESPIRONOLACTONA',
+    dosage: ['25MG', '50MG', '100MG'],
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
+  },
+  {
+    id: '19',
+    name: 'FUROSEMIDA',
+    dosage: ['40MG', '80MG', '120MG'],
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
+  },
+  {
+    id: '20',
+    name: 'FLUCONAZOL',
+    dosage: '100MG',
+    route: 'ORAL',
+    posology: ['12/12H', '24H'],
+    observation: `IN ${currentDate}`,
+    schedule: ''
+  },
+  {
+    id: '21',
+    name: 'GLIBENCLAMIDA',
+    dosage: '5MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
+  },
+  {
+    id: '22',
+    name: 'LEVOFLOXACINO',
+    dosage: '500MG',
+    route: 'ORAL',
+    posology: '24H',
+    observation: `IN ${currentDate}`,
+    schedule: ''
+  },
+  {
+    id: '23',
+    name: 'LOSARTANA',
+    dosage: '50MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
+  },
+  {
+    id: '24',
+    name: 'METFORMINA',
+    dosage: '850MG',
+    route: 'ORAL',
+    posology: ['8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
   },
   {
     id: '25',
-    name: 'AMOXICILINA SÓDICA + CLAVULANATO DE POTÁSSIO',
-    dosage: '1000MG +200MG',
-    route: 'IV',
-    posology: '12/12H',
-    observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
+    name: 'METILDOPA',
+    dosage: '250MG',
+    route: 'ORAL',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: '',
+    schedule: ''
   },
   {
     id: '26',
     name: 'METRONIDAZOL',
-    dosage: '250MG',
-    route: 'VO',
-    posology: ['12/12H', '8/8H'],
-    observation: `IN ${currentDate}`,
-    schedule: '',
-    type: 'injectable'
-  }
-];
-
-export const oralAntibiotics: Antibiotic[] = [
-  {
-    id: '1',
-    name: 'AMOXICILINA',
-    dosage: '500 MG (COMPRIMIDO OU CÁPSULA)',
-    route: 'ORAL',
-    posology: '8/8H',
-    observation: '',
-    schedule: 'S/N',
-    type: 'oral'
-  },
-  {
-    id: '2',
-    name: 'AMOXICILINA + CLAVULANATO',
-    dosage: '500 MG + 125 MG (COMPRIMIDO)',
+    dosage: ['250MG', '500MG'],
     route: 'ORAL',
     posology: ['8/8H', '12/12H'],
-    observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    observation: `IN ${currentDate}`,
+    schedule: ''
   },
   {
-    id: '3',
-    name: 'FENOXIMETILPENICILINA POTÁSSICA',
-    dosage: '250–500 MG (COMPRIMIDO)',
+    id: '27',
+    name: 'MIDAZOLAM',
+    dosage: '15MG',
     route: 'ORAL',
-    posology: '6/6H',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '4',
-    name: 'CEFALEXINA',
-    dosage: '500 MG (COMPRIMIDO OU CÁPSULA)',
+    id: '28',
+    name: 'NIFEDIPINO',
+    dosage: ['10MG', '20MG', '40MG'],
     route: 'ORAL',
-    posology: '6/6H',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '5',
-    name: 'CIPROFLOXACINO',
-    dosage: '500 MG (COMPRIMIDO)',
+    id: '29',
+    name: 'NIMESULIDA',
+    dosage: '100MG',
     route: 'ORAL',
-    posology: '12/12 H',
+    posology: ['12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '6',
-    name: 'LEVOFLOXACINO',
-    dosage: '500 MG (COMPRIMIDO)',
+    id: '30',
+    name: 'OMEPRAZOL',
+    dosage: ['20MG', '40MG'],
     route: 'ORAL',
-    posology: '1X DIA',
+    posology: ['MANHÃ EM JEJUM', '12/12H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '7',
-    name: 'AZITROMICINA',
-    dosage: '500 MG (COMPRIMIDO)',
+    id: '31',
+    name: 'OSELTAMIVIR',
+    dosage: '75MG',
     route: 'ORAL',
-    posology: '1X DIA',
-    observation: '',
-    schedule: '',
-    type: 'oral'
+    posology: ['12/12H'],
+    observation: `IN ${currentDate}`,
+    schedule: ''
   },
   {
-    id: '8',
-    name: 'CLARITROMICINA',
-    dosage: '500 MG (COMPRIMIDO)',
+    id: '32',
+    name: 'PARACETAMOL',
+    dosage: '500MG',
     route: 'ORAL',
-    posology: '12/12H',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '9',
-    name: 'CLORANFENICOL',
-    dosage: '250 MG (COMPRIMIDO)',
+    id: '33',
+    name: 'PENTOXIFILINA',
+    dosage: '400MG',
     route: 'ORAL',
-    posology: '6/6H',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '10',
-    name: 'CLINDAMICINA',
-    dosage: ['300 MG (CÁPSULA)', '150 MG (CÁPSULA)'],
+    id: '34',
+    name: 'PREDNISONA',
+    dosage: ['20MG', '40MG'],
     route: 'ORAL',
-    posology: '6/6 H',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '11',
-    name: 'DOXICICLINA',
-    dosage: '100 MG (COMPRIMIDO)',
+    id: '35',
+    name: 'PROPATILNITRATO (SUSTRATE)',
+    dosage: '10MG',
     route: 'ORAL',
-    posology: '12/12H',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '13',
-    name: 'MOXIFLOXACINO',
-    dosage: '400 MG (COMPRIMIDO)',
+    id: '36',
+    name: 'PROPRANOLOL',
+    dosage: '40MG',
     route: 'ORAL',
-    posology: '24/24 H',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '14',
-    name: 'TETRACICLINA',
-    dosage: '500 MG (CÁPSULA)',
+    id: '37',
+    name: 'QUELATO DE FERRO + ÁCIDO FÓLICO + CIANOCOBALAMINA',
+    dosage: '300 MG + 5MG + 15.000CMG',
     route: 'ORAL',
-    posology: '6/6 H',
-    observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: 'CORRESPONDENTE A 41,66 MG DE FERRO ELEMENTAR',
+    schedule: ''
   },
   {
-    id: '15',
-    name: 'SULFADIAZINA',
-    dosage: '500 MG (COMPRIMIDO)',
+    id: '38',
+    name: 'SULFATO FERROSO',
+    dosage: '40MG',
     route: 'ORAL',
-    posology: '6/6 H',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   },
   {
-    id: '16',
-    name: 'SULFAMETOXAZOL + TRIMETOPRIMA',
-    dosage: ['400 MG + 80 MG', '800 MG + 160 MG'],
+    id: '39',
+    name: 'SULFAMETOXAZOL + TRIMETROPINA',
+    dosage: ['400MG + 80MG', '800MG + 160MG'],
     route: 'ORAL',
-    posology: '12/12 H',
-    observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
+    observation: `IN ${currentDate}`,
+    schedule: ''
   },
   {
-    id: '17',
-    name: 'NITROFURANTOÍNA',
-    dosage: '100 MG (CÁPSULA)',
+    id: '40',
+    name: 'VERAPAMIL',
+    dosage: '40MG',
     route: 'ORAL',
-    posology: '6/6 H',
+    posology: ['6/6H', '8/8H', '12/12H', '24H'],
     observation: '',
-    schedule: 'S/N',
-    type: 'oral'
-  },
-  {
-    id: '18',
-    name: 'LINEZOLIDA',
-    dosage: '600 MG (COMPRIMIDO)',
-    route: 'ORAL',
-    posology: '12/12 H',
-    observation: '',
-    schedule: 'S/N',
-    type: 'oral'
-  },
-  {
-    id: '19',
-    name: 'OFLOXACINO',
-    dosage: '400 MG (COMPRIMIDO)',
-    route: 'ORAL',
-    posology: '12/12 H',
-    observation: '',
-    schedule: 'S/N',
-    type: 'oral'
+    schedule: ''
   }
 ]; 

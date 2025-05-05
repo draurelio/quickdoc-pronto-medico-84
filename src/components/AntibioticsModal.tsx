@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { injectableAntibiotics, oralAntibiotics, Antibiotic } from '../data/antibioticsData';
+import { oralMedications, OralMedication } from '../data/antibioticsData';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -12,16 +12,15 @@ import {
 interface AntibioticsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddAntibiotic: (antibiotic: Antibiotic) => void;
+  onAddAntibiotic: (antibiotic: OralMedication) => void;
 }
 
 const AntibioticsModal: React.FC<AntibioticsModalProps> = ({ isOpen, onClose, onAddAntibiotic }) => {
-  const [activeTab, setActiveTab] = useState<'injectable' | 'oral'>('injectable');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedAntibiotic, setSelectedAntibiotic] = useState<Antibiotic | null>(null);
+  const [selectedAntibiotic, setSelectedAntibiotic] = useState<OralMedication | null>(null);
   const [fieldSelections, setFieldSelections] = useState<any>({});
 
-  const handleSelectAntibiotic = (antibiotic: Antibiotic) => {
+  const handleSelectAntibiotic = (antibiotic: OralMedication) => {
     setSelectedAntibiotic(antibiotic);
     setFieldSelections({
       dosage: Array.isArray(antibiotic.dosage) ? antibiotic.dosage[0] : antibiotic.dosage,
@@ -53,10 +52,9 @@ const AntibioticsModal: React.FC<AntibioticsModalProps> = ({ isOpen, onClose, on
 
   if (!isOpen) return null;
 
-  const antibioticsList = activeTab === 'injectable' ? injectableAntibiotics : oralAntibiotics;
-  const sortedAntibiotics = antibioticsList.slice().sort((a, b) => a.name.localeCompare(b.name));
-  const filteredAntibiotics = sortedAntibiotics.filter(antibiotic =>
-    antibiotic.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const sortedMedications = oralMedications.slice().sort((a, b) => a.name.localeCompare(b.name));
+  const filteredMedications = sortedMedications.filter(med =>
+    med.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -65,34 +63,20 @@ const AntibioticsModal: React.FC<AntibioticsModalProps> = ({ isOpen, onClose, on
         <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={onClose}>
           ✕
         </button>
-        <h2 className="text-xl font-bold mb-4">Selecionar Antibiótico</h2>
+        <h2 className="text-xl font-bold mb-4">Selecionar Comprimido</h2>
         {!selectedAntibiotic ? (
           <>
-            <div className="flex mb-4">
-              <button
-                className={`px-4 py-2 mr-2 ${activeTab === 'injectable' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                onClick={() => setActiveTab('injectable')}
-              >
-                Injetáveis
-              </button>
-              <button
-                className={`px-4 py-2 ${activeTab === 'oral' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                onClick={() => setActiveTab('oral')}
-              >
-                Orais
-              </button>
-            </div>
             <div className="mb-4">
               <input
                 type="text"
-                placeholder="Buscar antibiótico..."
+                placeholder="Buscar comprimido..."
                 className="w-full p-2 border rounded"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
-              {filteredAntibiotics.map((antibiotic) => (
+              {filteredMedications.map((antibiotic) => (
                 <div
                   key={antibiotic.id}
                   className="border p-4 rounded hover:bg-gray-50 cursor-pointer"
