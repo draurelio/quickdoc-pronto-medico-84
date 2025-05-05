@@ -10,6 +10,8 @@ import DefaultMedicationsButton from './prescriptions/DefaultMedicationsButton';
 import PrescriptionActions from './prescriptions/PrescriptionActions';
 import InjectableModal from './InjectableModal';
 import { InjectableMedication } from '../data/injectablesData';
+import PrescriptionModelsModal from './prescriptions/PrescriptionModelsModal';
+import { FilePlus } from 'lucide-react';
 
 export interface PrescriptionItem {
   id: string;
@@ -46,6 +48,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
   ]);
   const [isAntibioticsModalOpen, setIsAntibioticsModalOpen] = useState(false);
   const [isInjectableModalOpen, setIsInjectableModalOpen] = useState(false);
+  const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
 
   const updateField = (id: string, field: keyof PrescriptionItem, value: string) => {
     const upperValue = value.toUpperCase();
@@ -126,12 +129,27 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     setIsInjectableModalOpen(false);
   };
 
+  const handleApplyModel = (model: PrescriptionItem[]) => {
+    setPrescriptions(model);
+    onDataChange(model);
+    setIsModelsModalOpen(false);
+  };
+
   return (
     <Card className="mb-6">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl text-medblue-600">Prescrição Médica</CardTitle>
-          <DefaultMedicationsButton onAddDefaults={handleAddDefaultMedications} />
+          <div className="flex gap-2">
+            <DefaultMedicationsButton onAddDefaults={handleAddDefaultMedications} />
+            <button
+              type="button"
+              className="flex items-center gap-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded shadow-sm border border-blue-200"
+              onClick={() => setIsModelsModalOpen(true)}
+            >
+              <FilePlus size={18} /> Modelo
+            </button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -164,6 +182,12 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
           isOpen={isInjectableModalOpen}
           onClose={() => setIsInjectableModalOpen(false)}
           onAddMedication={handleAddInjectable}
+        />
+        <PrescriptionModelsModal
+          isOpen={isModelsModalOpen}
+          onClose={() => setIsModelsModalOpen(false)}
+          prescriptions={prescriptions}
+          onApplyModel={handleApplyModel}
         />
       </CardContent>
     </Card>

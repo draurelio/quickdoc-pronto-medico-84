@@ -65,7 +65,7 @@ export const generateDocxFromTemplate = async (data: DocumentData) => {
     });
 
     // Fazer o download do arquivo
-    const fileName = `prontuario_${data.patient.name?.replace(/\s+/g, '_')}_${formatDate(new Date().toISOString().slice(0, 10))}.docx`;
+    const fileName = `Enfermaria - ${data.patient.name?.replace(/\s+/g, '_')}.docx`;
     saveAs(content, fileName);
     
     console.log("Documento gerado com sucesso!");
