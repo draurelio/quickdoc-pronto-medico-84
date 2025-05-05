@@ -20,8 +20,8 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({ onSubmit }) => {
       dose: antibiotic.dosage,
       route: antibiotic.route,
       frequency: antibiotic.posology,
-      notes: antibiotic.observation,
-      time: antibiotic.schedule
+      notes: antibiotic.observation || '',
+      time: antibiotic.schedule || ''
     };
     setPrescriptions([...prescriptions, newPrescription]);
     setIsAntibioticsModalOpen(false);
@@ -172,4 +172,4 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({ onSubmit }) => {
   );
 };
 
-export default PrescriptionForm; 
+export default PrescriptionForm;

@@ -87,12 +87,12 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     const defaultMedsWithIds = defaultMedications.map(med => ({
       ...med,
       id: uuidv4(),
-      medication: med.medication.toUpperCase(),
-      dose: (med.dose || '').toUpperCase(),
-      route: (med.route || '').toUpperCase(),
-      frequency: (med.frequency || '').toUpperCase(),
-      notes: (med.notes || '').toUpperCase(),
-      time: (med.time || '').toUpperCase(),
+      medication: typeof med.medication === 'string' ? med.medication.toUpperCase() : med.medication,
+      dose: typeof med.dose === 'string' ? med.dose.toUpperCase() : (med.dose || ''),
+      route: typeof med.route === 'string' ? med.route.toUpperCase() : (med.route || ''),
+      frequency: typeof med.frequency === 'string' ? med.frequency.toUpperCase() : (med.frequency || ''),
+      notes: typeof med.notes === 'string' ? med.notes.toUpperCase() : (med.notes || ''),
+      time: typeof med.time === 'string' ? med.time.toUpperCase() : (med.time || ''),
     }));
     setPrescriptions(defaultMedsWithIds);
     onDataChange(defaultMedsWithIds);
