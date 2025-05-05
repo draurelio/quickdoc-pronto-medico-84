@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -83,16 +84,26 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     }
   };
 
+  // Helper function to safely convert to uppercase
+  const safeToUpperCase = (value: string | string[] | undefined): string => {
+    if (typeof value === 'string') {
+      return value.toUpperCase();
+    } else if (Array.isArray(value) && value.length > 0) {
+      return value[0].toUpperCase();
+    }
+    return '';
+  };
+
   const addDefaultMedications = () => {
     const defaultMedsWithIds = defaultMedications.map(med => ({
       ...med,
       id: uuidv4(),
-      medication: typeof med.medication === 'string' ? med.medication.toUpperCase() : med.medication,
-      dose: typeof med.dose === 'string' ? med.dose.toUpperCase() : (med.dose || ''),
-      route: typeof med.route === 'string' ? med.route.toUpperCase() : (med.route || ''),
-      frequency: typeof med.frequency === 'string' ? med.frequency.toUpperCase() : (med.frequency || ''),
-      notes: typeof med.notes === 'string' ? med.notes.toUpperCase() : (med.notes || ''),
-      time: typeof med.time === 'string' ? med.time.toUpperCase() : (med.time || ''),
+      medication: safeToUpperCase(med.medication),
+      dose: safeToUpperCase(med.dose),
+      route: safeToUpperCase(med.route),
+      frequency: safeToUpperCase(med.frequency),
+      notes: safeToUpperCase(med.notes),
+      time: safeToUpperCase(med.time),
     }));
     setPrescriptions(defaultMedsWithIds);
     onDataChange(defaultMedsWithIds);
@@ -101,12 +112,12 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
   const handleAddAntibiotic = (antibiotic: Antibiotic) => {
     const newPrescription: PrescriptionItem = {
       id: uuidv4(),
-      medication: antibiotic.name.toUpperCase(),
-      dose: antibiotic.dosage.toUpperCase(),
-      route: antibiotic.route.toUpperCase(),
-      frequency: antibiotic.posology.toUpperCase(),
-      notes: (antibiotic.observation || '').toUpperCase(),
-      time: (antibiotic.schedule || '').toUpperCase()
+      medication: safeToUpperCase(antibiotic.name),
+      dose: safeToUpperCase(antibiotic.dosage),
+      route: safeToUpperCase(antibiotic.route),
+      frequency: safeToUpperCase(antibiotic.posology),
+      notes: safeToUpperCase(antibiotic.observation),
+      time: safeToUpperCase(antibiotic.schedule)
     };
     const updatedPrescriptions = [...prescriptions, newPrescription];
     setPrescriptions(updatedPrescriptions);
