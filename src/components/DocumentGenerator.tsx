@@ -7,11 +7,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { generateDocxFromTemplate } from "../utils/documentTemplate";
 import { toast } from "@/components/ui/use-toast";
 import { FileText } from "lucide-react";
+import { Antibiotic } from '../data/antibioticsData';
+import { formatDate } from '../utils/formatUtils';
 
 interface DocumentGeneratorProps {
   patientData: PatientData;
   prescriptionData: PrescriptionItem[];
   medicalData: MedicalFormData;
+}
+
+interface DocumentData {
+  patient: PatientData;
+  prescription: PrescriptionItem[];
+  medical: MedicalFormData;
+  antibiotics?: Antibiotic[];
 }
 
 const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
@@ -57,6 +66,123 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
         variant: "destructive",
       });
     }
+  };
+
+  const generateMedicalRecordHtml = (data: DocumentData): string => {
+    const headerHtml = `
+      <div class="header">
+        <h1>Pronto Atendimento</h1>
+        <p>${formatDate(new Date().toISOString().slice(0, 10))}</p>
+      </div>
+    `;
+
+    const patientInfoHtml = `
+      <div class="section">
+        <h2>Dados do Paciente</h2>
+        <p><strong>Nome:</strong> ${data.patient.name}</p>
+        <p><strong>Idade:</strong> ${data.patient.age}</p>
+        <p><strong>Data de Internação:</strong> ${formatDate(data.patient.admissionDate)}</p>
+      </div>
+    `;
+
+    const prescriptionHtml = data.prescription.length ? `
+      <div class="section">
+        <h2>Prescrição</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Medicamento</th>
+              <th>Dosagem</th>
+              <th>Via</th>
+              <th>Posologia</th>
+              <th>Horário</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.prescription.map(item => `
+              <tr>
+                <td>${item.medication}</td>
+                <td>${item.dose}</td>
+                <td>${item.route}</td>
+                <td>${item.frequency}</td>
+                <td>${item.time}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : '';
+
+    const antibioticsHtml = data.antibiotics?.length ? `
+      <div class="section">
+        <h2>Antibióticos</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Medicamento</th>
+              <th>Dosagem</th>
+              <th>Via</th>
+              <th>Posologia</th>
+              <th>Observação</th>
+              <th>Horário</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.antibiotics.map(antibiotic => `
+              <tr>
+                <td>${antibiotic.name}</td>
+                <td>${antibiotic.dosage}</td>
+                <td>${antibiotic.route}</td>
+                <td>${antibiotic.posology}</td>
+                <td>${antibiotic.observation || ''}</td>
+                <td>${antibiotic.schedule || ''}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : '';
+
+    const medicalDataHtml = `
+      <div class="section">
+        <h2>Dados Médicos</h2>
+        <p><strong>Admissão:</strong> ${data.medical.admission}</p>
+        <p><strong>Comorbidades:</strong> ${data.medical.comorbidities}</p>
+        <p><strong>MUC:</strong> ${data.medical.medicationReason}</p>
+        <p><strong>Exame Físico:</strong> ${data.medical.physicalExam}</p>
+        <p><strong>Análise:</strong> ${data.medical.analysis}</p>
+        <p><strong>Condutas:</strong> ${data.medical.plans}</p>
+      </div>
+    `;
+
+    const footerHtml = `
+      <div class="footer">
+        <p>Data: ${formatDate(new Date().toISOString().slice(0, 10))}</p>
+      </div>
+    `;
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Pronto Atendimento - ${data.patient.name}</title>
+          <style>
+            /* ... existing styles ... */
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            ${headerHtml}
+            ${patientInfoHtml}
+            ${prescriptionHtml}
+            ${antibioticsHtml}
+            ${medicalDataHtml}
+            ${footerHtml}
+          </div>
+        </body>
+      </html>
+    `;
   };
 
   return (

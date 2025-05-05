@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Antibiotic } from '../data/antibioticsData';
+import AntibioticsModal from './AntibioticsModal';
 
 export interface PrescriptionItem {
   id: string;
@@ -47,10 +49,12 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
       time: '' 
     }
   ]);
+  const [isAntibioticsModalOpen, setIsAntibioticsModalOpen] = useState(false);
 
   const updateField = (id: string, field: keyof PrescriptionItem, value: string) => {
+    const upperValue = value.toUpperCase();
     const updatedPrescriptions = prescriptions.map(prescription => 
-      prescription.id === id ? { ...prescription, [field]: value } : prescription
+      prescription.id === id ? { ...prescription, [field]: upperValue } : prescription
     );
     setPrescriptions(updatedPrescriptions);
     onDataChange(updatedPrescriptions);
@@ -82,10 +86,32 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
   const addDefaultMedications = () => {
     const defaultMedsWithIds = defaultMedications.map(med => ({
       ...med,
-      id: uuidv4()
+      id: uuidv4(),
+      medication: med.medication.toUpperCase(),
+      dose: (med.dose || '').toUpperCase(),
+      route: (med.route || '').toUpperCase(),
+      frequency: (med.frequency || '').toUpperCase(),
+      notes: (med.notes || '').toUpperCase(),
+      time: (med.time || '').toUpperCase(),
     }));
     setPrescriptions(defaultMedsWithIds);
     onDataChange(defaultMedsWithIds);
+  };
+
+  const handleAddAntibiotic = (antibiotic: Antibiotic) => {
+    const newPrescription: PrescriptionItem = {
+      id: uuidv4(),
+      medication: antibiotic.name.toUpperCase(),
+      dose: antibiotic.dosage.toUpperCase(),
+      route: antibiotic.route.toUpperCase(),
+      frequency: antibiotic.posology.toUpperCase(),
+      notes: (antibiotic.observation || '').toUpperCase(),
+      time: (antibiotic.schedule || '').toUpperCase()
+    };
+    const updatedPrescriptions = [...prescriptions, newPrescription];
+    setPrescriptions(updatedPrescriptions);
+    onDataChange(updatedPrescriptions);
+    setIsAntibioticsModalOpen(false);
   };
 
   const renderInput = (prescription: PrescriptionItem, field: keyof PrescriptionItem) => {
@@ -95,13 +121,13 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
           value={prescription[field] as string}
           onValueChange={(value) => updateField(prescription.id, field, value)}
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder={`Selecione ${field}`} />
+          <SelectTrigger className="w-full uppercase">
+            <SelectValue placeholder={`Selecione ${field}`.toUpperCase()} />
           </SelectTrigger>
           <SelectContent>
             {prescription.options[field]?.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
+              <SelectItem key={option} value={option.toUpperCase()} className="uppercase">
+                {option.toUpperCase()}
               </SelectItem>
             ))}
           </SelectContent>
@@ -114,6 +140,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
         value={prescription[field] as string}
         onChange={(e) => updateField(prescription.id, field, e.target.value)}
         placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+        className="uppercase"
       />
     );
   };
@@ -180,12 +207,25 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
             </TableBody>
           </Table>
         </div>
-        <Button 
-          onClick={addRow} 
-          className="mt-4 bg-medblue-500 hover:bg-medblue-600"
-        >
-          <Plus size={16} className="mr-1" /> Adicionar linha
-        </Button>
+        <div className="flex gap-2 mt-4">
+          <Button 
+            onClick={addRow} 
+            className="bg-medblue-500 hover:bg-medblue-600"
+          >
+            <Plus size={16} className="mr-1" /> Adicionar linha
+          </Button>
+          <Button 
+            onClick={() => setIsAntibioticsModalOpen(true)}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            + Antibióticos
+          </Button>
+        </div>
+        <AntibioticsModal
+          isOpen={isAntibioticsModalOpen}
+          onClose={() => setIsAntibioticsModalOpen(false)}
+          onAddAntibiotic={handleAddAntibiotic}
+        />
       </CardContent>
     </Card>
   );
