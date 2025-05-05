@@ -11,16 +11,8 @@ import { formatDate } from './formatUtils';
 /**
  * Generates and downloads a PDF file from HTML content
  */
-export const generateAndDownloadPdf = (
-  patientData: PatientData,
-  prescriptionData: PrescriptionItem[],
-  medicalData: MedicalFormData
-): void => {
-  const documentData: DocumentData = {
-    patient: patientData,
-    prescriptions: prescriptionData,
-    medical: medicalData
-  };
+export const generateAndDownloadPdf = (documentData: DocumentData): void => {
+  const { patient, prescriptions, medical } = documentData;
   
   const htmlContent = generateMedicalRecordHtml(documentData);
   
@@ -30,7 +22,7 @@ export const generateAndDownloadPdf = (
 
   const options = {
     margin: 10,
-    filename: `prontuario_${patientData.name.toLowerCase().replace(/\s+/g, '_')}.pdf`,
+    filename: `prontuario_${patient.name.toLowerCase().replace(/\s+/g, '_')}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2 },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -45,10 +37,10 @@ export const generateAndDownloadPdf = (
  * Generates and downloads a DOCX file
  */
 export const generateAndDownloadDocx = (
-  patientData: PatientData,
-  prescriptionData: PrescriptionItem[],
-  medicalData: MedicalFormData
+  documentData: DocumentData
 ): void => {
+  const { patient, prescriptions, medical } = documentData;
+  
   // Create a new document
   const doc = new Document({
     sections: [{
@@ -81,7 +73,7 @@ export const generateAndDownloadDocx = (
               text: "Nome: ",
               bold: true,
             }),
-            new TextRun(patientData.name || "Não informado")
+            new TextRun(patient.name || "Não informado")
           ]
         }),
 
@@ -91,7 +83,7 @@ export const generateAndDownloadDocx = (
               text: "Idade: ",
               bold: true,
             }),
-            new TextRun(patientData.age || "Não informada")
+            new TextRun(patient.age || "Não informada")
           ]
         }),
 
@@ -101,7 +93,7 @@ export const generateAndDownloadDocx = (
               text: "Data de Admissão: ",
               bold: true,
             }),
-            new TextRun(formatDate(patientData.admissionDate) || "Não informada")
+            new TextRun(formatDate(patient.admissionDate) || "Não informada")
           ]
         }),
 
@@ -111,7 +103,7 @@ export const generateAndDownloadDocx = (
               text: "Diagnóstico: ",
               bold: true,
             }),
-            new TextRun(patientData.diagnosis || "Não informado")
+            new TextRun(patient.diagnosis || "Não informado")
           ]
         }),
 
@@ -121,7 +113,7 @@ export const generateAndDownloadDocx = (
               text: "Alergias: ",
               bold: true,
             }),
-            new TextRun(patientData.allergies || "Nenhuma informada")
+            new TextRun(patient.allergies || "Nenhuma informada")
           ]
         }),
 
@@ -131,7 +123,7 @@ export const generateAndDownloadDocx = (
               text: "Procedência: ",
               bold: true,
             }),
-            new TextRun(patientData.origin || "Não informada")
+            new TextRun(patient.origin || "Não informada")
           ],
           spacing: {
             after: 200
@@ -155,7 +147,7 @@ export const generateAndDownloadDocx = (
               text: "História da Doença Atual: ",
               bold: true,
             }),
-            new TextRun(medicalData.admission || "Não informada")
+            new TextRun(medical.admission || "Não informada")
           ],
           spacing: {
             after: 100
@@ -168,7 +160,7 @@ export const generateAndDownloadDocx = (
               text: "Comorbidades: ",
               bold: true,
             }),
-            new TextRun(medicalData.comorbidities || "Nenhuma informada")
+            new TextRun(medical.comorbidities || "Nenhuma informada")
           ],
           spacing: {
             after: 100
@@ -181,7 +173,7 @@ export const generateAndDownloadDocx = (
               text: "Exame Físico: ",
               bold: true,
             }),
-            new TextRun(medicalData.physicalExam || "Não informado")
+            new TextRun(medical.physicalExam || "Não informado")
           ],
           spacing: {
             after: 100
@@ -194,7 +186,7 @@ export const generateAndDownloadDocx = (
               text: "Análise: ",
               bold: true,
             }),
-            new TextRun(medicalData.analysis || "Não informada")
+            new TextRun(medical.analysis || "Não informada")
           ],
           spacing: {
             after: 100
@@ -207,7 +199,7 @@ export const generateAndDownloadDocx = (
               text: "Planos: ",
               bold: true,
             }),
-            new TextRun(medicalData.plans || "Não informados")
+            new TextRun(medical.plans || "Não informados")
           ],
           spacing: {
             after: 200
@@ -226,7 +218,7 @@ export const generateAndDownloadDocx = (
         }),
 
         // Add each prescription item
-        ...prescriptionData.map((item) => {
+        ...prescriptions.map((item) => {
           return new Paragraph({
             children: [
               new TextRun({
@@ -256,7 +248,7 @@ export const generateAndDownloadDocx = (
 
         // Footer with date
         new Paragraph({
-          text: `Data: ${formatDate(patientData.currentDate) || formatDate(new Date().toISOString().split('T')[0])}`,
+          text: `Data: ${formatDate(patient.currentDate) || formatDate(new Date().toISOString().split('T')[0])}`,
           alignment: AlignmentType.RIGHT,
           spacing: {
             before: 400
@@ -268,6 +260,6 @@ export const generateAndDownloadDocx = (
 
   // Generate and save the docx file
   Packer.toBlob(doc).then(blob => {
-    saveAs(blob, `prontuario_${patientData.name.toLowerCase().replace(/\s+/g, '_')}.docx`);
+    saveAs(blob, `prontuario_${patient.name.toLowerCase().replace(/\s+/g, '_')}.docx`);
   });
 };

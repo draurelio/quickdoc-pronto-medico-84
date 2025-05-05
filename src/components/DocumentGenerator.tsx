@@ -9,6 +9,8 @@ import { toast } from "@/components/ui/use-toast";
 import { FileText } from "lucide-react";
 import { Antibiotic } from '../data/antibioticsData';
 import { formatDate } from '../utils/formatUtils';
+import { supabase } from "@/lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 interface DocumentGeneratorProps {
   patientData: PatientData;
@@ -28,6 +30,8 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
   prescriptionData,
   medicalData,
 }) => {
+  const navigate = useNavigate();
+
   const checkRequiredFields = () => {
     if (!patientData.name) {
       toast({
@@ -38,6 +42,58 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
       return false;
     }
     return true;
+  };
+
+  const savePrescriptionToDatabase = async () => {
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      
+      if (!session?.session?.user) {
+        toast({
+          title: "Atenção",
+          description: "É necessário estar logado para salvar prescrições.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      const { data, error } = await supabase
+        .from('prescriptions')
+        .insert({
+          user_id: session.session.user.id,
+          patient_name: patientData.name,
+          patient_age: patientData.age,
+          admission_date: patientData.admissionDate,
+          diagnosis: patientData.diagnosis,
+          prescription_data: prescriptionData,
+          medical_data: medicalData,
+          patient_data: patientData
+        });
+      
+      if (error) {
+        console.error("Erro ao salvar prescrição:", error);
+        toast({
+          title: "Erro",
+          description: "Ocorreu um erro ao salvar a prescrição no histórico.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      toast({
+        title: "Sucesso!",
+        description: "Prescrição salva no histórico com sucesso.",
+      });
+      return true;
+    } catch (error) {
+      console.error("Erro ao salvar prescrição:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar a prescrição no histórico.",
+        variant: "destructive",
+      });
+      return false;
+    }
   };
 
   const handleGenerateDocx = async () => {
@@ -51,8 +107,11 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
       await generateDocxFromTemplate({
         patient: patientData,
         prescriptions: prescriptionData,
-        medical: medicalData,
+        medical: medicalData
       });
+      
+      // Salvar no banco de dados
+      await savePrescriptionToDatabase();
       
       toast({
         title: "Sucesso!",
@@ -66,6 +125,10 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
         variant: "destructive",
       });
     }
+  };
+
+  const handleViewHistory = () => {
+    navigate("/historico");
   };
 
   const generateMedicalRecordHtml = (data: DocumentData): string => {
@@ -192,13 +255,23 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
           <p className="text-center text-muted-foreground mb-4">
             Após preencher todos os campos necessários, clique no botão abaixo para gerar e baixar o prontuário médico.
           </p>
-          <Button 
-            onClick={handleGenerateDocx}
-            className="bg-green-600 hover:bg-green-700 text-lg py-6"
-            size="lg"
-          >
-            <FileText className="mr-2" /> GERAR PRESCRIÇÃO
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button 
+              onClick={handleGenerateDocx}
+              className="bg-green-600 hover:bg-green-700 text-lg py-6"
+              size="lg"
+            >
+              <FileText className="mr-2" /> GERAR PRESCRIÇÃO
+            </Button>
+            <Button 
+              onClick={handleViewHistory}
+              className="bg-blue-600 hover:bg-blue-700 text-lg py-6"
+              size="lg"
+              variant="outline"
+            >
+              HISTÓRICO DE PRESCRIÇÕES
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
