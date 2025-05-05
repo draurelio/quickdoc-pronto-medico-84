@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { Antibiotic } from '../data/antibioticsData';
 import AntibioticsModal from './AntibioticsModal';
 import { PrescriptionItem } from './PrescriptionTable';
+import { useToast } from '@/hooks/use-toast';
 
 interface PrescriptionFormProps {
   onSubmit: (data: any) => void;
@@ -12,19 +14,25 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({ onSubmit }) => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionItem[]>([
     { id: '1', medication: '', dose: '', route: '', frequency: '', notes: '', time: '' }
   ]);
+  const { toast } = useToast();
 
   const handleAddAntibiotic = (antibiotic: Antibiotic) => {
     const newPrescription: PrescriptionItem = {
       id: crypto.randomUUID(),
-      medication: antibiotic.name,
-      dose: antibiotic.dosage,
-      route: antibiotic.route,
-      frequency: antibiotic.posology,
-      notes: antibiotic.observation || '',
-      time: antibiotic.schedule || ''
+      medication: typeof antibiotic.name === 'string' ? antibiotic.name : Array.isArray(antibiotic.name) ? antibiotic.name[0] : '',
+      dose: typeof antibiotic.dosage === 'string' ? antibiotic.dosage : Array.isArray(antibiotic.dosage) ? antibiotic.dosage[0] : '',
+      route: typeof antibiotic.route === 'string' ? antibiotic.route : Array.isArray(antibiotic.route) ? antibiotic.route[0] : '',
+      frequency: typeof antibiotic.posology === 'string' ? antibiotic.posology : Array.isArray(antibiotic.posology) ? antibiotic.posology[0] : '',
+      notes: typeof antibiotic.observation === 'string' ? antibiotic.observation : Array.isArray(antibiotic.observation) ? antibiotic.observation[0] : '',
+      time: typeof antibiotic.schedule === 'string' ? antibiotic.schedule : Array.isArray(antibiotic.schedule) ? antibiotic.schedule[0] : ''
     };
     setPrescriptions([...prescriptions, newPrescription]);
     setIsAntibioticsModalOpen(false);
+    
+    toast({
+      title: 'Antibiótico adicionado',
+      description: `${newPrescription.medication} foi adicionado à prescrição`,
+    });
   };
 
   const handleRemoveAntibiotic = (index: number) => {
