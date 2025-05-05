@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PrescriptionHistory from "./pages/PrescriptionHistory";
+import Login from "./pages/Login";
 
 // Criar o QueryClient fora do componente para evitar recriação em cada renderização
 const queryClient = new QueryClient({
@@ -30,6 +31,7 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/historico" element={<PrescriptionHistory />} />
+              <Route path="/login" element={<Login />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
