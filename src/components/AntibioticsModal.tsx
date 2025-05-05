@@ -54,7 +54,8 @@ const AntibioticsModal: React.FC<AntibioticsModalProps> = ({ isOpen, onClose, on
   if (!isOpen) return null;
 
   const antibioticsList = activeTab === 'injectable' ? injectableAntibiotics : oralAntibiotics;
-  const filteredAntibiotics = antibioticsList.filter(antibiotic =>
+  const sortedAntibiotics = antibioticsList.slice().sort((a, b) => a.name.localeCompare(b.name));
+  const filteredAntibiotics = sortedAntibiotics.filter(antibiotic =>
     antibiotic.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

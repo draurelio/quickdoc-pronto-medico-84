@@ -197,7 +197,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
             className="bg-green-600 hover:bg-green-700 text-lg py-6"
             size="lg"
           >
-            <FileText className="mr-2" /> Gerar DOCX
+            <FileText className="mr-2" /> GERAR PRESCRIÇÃO
           </Button>
         </div>
       </CardContent>
