@@ -12,7 +12,6 @@ import InjectableModal from './InjectableModal';
 import { InjectableMedication } from '../data/injectablesData';
 import PrescriptionModelsModal from './prescriptions/PrescriptionModelsModal';
 import { FilePlus } from 'lucide-react';
-
 export interface PrescriptionItem {
   id: string;
   medication: string;
@@ -29,51 +28,47 @@ export interface PrescriptionItem {
     notes?: string[];
   };
 }
-
 interface PrescriptionTableProps {
   onDataChange: (data: PrescriptionItem[]) => void;
 }
-
-const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) => {
-  const [prescriptions, setPrescriptions] = useState<PrescriptionItem[]>([
-    { 
-      id: '1', 
-      medication: '', 
-      dose: '', 
-      route: '', 
-      frequency: '', 
-      notes: '', 
-      time: '' 
-    }
-  ]);
+const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
+  onDataChange
+}) => {
+  const [prescriptions, setPrescriptions] = useState<PrescriptionItem[]>([{
+    id: '1',
+    medication: '',
+    dose: '',
+    route: '',
+    frequency: '',
+    notes: '',
+    time: ''
+  }]);
   const [isAntibioticsModalOpen, setIsAntibioticsModalOpen] = useState(false);
   const [isInjectableModalOpen, setIsInjectableModalOpen] = useState(false);
   const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
-
   const updateField = (id: string, field: keyof PrescriptionItem, value: string) => {
     const upperValue = value.toUpperCase();
-    const updatedPrescriptions = prescriptions.map(prescription => 
-      prescription.id === id ? { ...prescription, [field]: upperValue } : prescription
-    );
+    const updatedPrescriptions = prescriptions.map(prescription => prescription.id === id ? {
+      ...prescription,
+      [field]: upperValue
+    } : prescription);
     setPrescriptions(updatedPrescriptions);
     onDataChange(updatedPrescriptions);
   };
-
   const addRow = () => {
-    const newPrescription: PrescriptionItem = { 
-      id: uuidv4(), 
-      medication: '', 
-      dose: '', 
-      route: '', 
-      frequency: '', 
-      notes: '', 
-      time: '' 
+    const newPrescription: PrescriptionItem = {
+      id: uuidv4(),
+      medication: '',
+      dose: '',
+      route: '',
+      frequency: '',
+      notes: '',
+      time: ''
     };
     const updatedPrescriptions = [...prescriptions, newPrescription];
     setPrescriptions(updatedPrescriptions);
     onDataChange(updatedPrescriptions);
   };
-
   const removeRow = (id: string) => {
     if (prescriptions.length > 1) {
       const updatedPrescriptions = prescriptions.filter(p => p.id !== id);
@@ -91,12 +86,10 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     }
     return '';
   };
-
   const handleAddDefaultMedications = (defaultMeds: PrescriptionItem[]) => {
     setPrescriptions(defaultMeds);
     onDataChange(defaultMeds);
   };
-
   const handleAddAntibiotic = (antibiotic: OralMedication) => {
     const newPrescription: PrescriptionItem = {
       id: uuidv4(),
@@ -112,7 +105,6 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     onDataChange(updatedPrescriptions);
     setIsAntibioticsModalOpen(false);
   };
-
   const handleAddInjectable = (medication: InjectableMedication) => {
     const newPrescription: PrescriptionItem = {
       id: uuidv4(),
@@ -128,25 +120,18 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
     onDataChange(updatedPrescriptions);
     setIsInjectableModalOpen(false);
   };
-
   const handleApplyModel = (model: PrescriptionItem[]) => {
     setPrescriptions(model);
     onDataChange(model);
     setIsModelsModalOpen(false);
   };
-
-  return (
-    <Card className="mb-6">
+  return <Card className="mb-6">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl text-medblue-600">Prescrição Médica</CardTitle>
           <div className="flex gap-2">
             <DefaultMedicationsButton onAddDefaults={handleAddDefaultMedications} />
-            <button
-              type="button"
-              className="flex items-center gap-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded shadow-sm border border-blue-200"
-              onClick={() => setIsModelsModalOpen(true)}
-            >
+            <button type="button" onClick={() => setIsModelsModalOpen(true)} className="flex items-center gap-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded shadow-sm border border-blue-200 font-medium text-base">
               <FilePlus size={18} /> Modelo
             </button>
           </div>
@@ -157,41 +142,15 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ onDataChange }) =
           <Table>
             <PrescriptionTableHeader />
             <TableBody>
-              {prescriptions.map((prescription) => (
-                <PrescriptionTableRow 
-                  key={prescription.id}
-                  prescription={prescription}
-                  onRemove={removeRow}
-                  onUpdate={updateField}
-                />
-              ))}
+              {prescriptions.map(prescription => <PrescriptionTableRow key={prescription.id} prescription={prescription} onRemove={removeRow} onUpdate={updateField} />)}
             </TableBody>
           </Table>
         </div>
-        <PrescriptionActions 
-          onAddRow={addRow}
-          onOpenAntibioticsModal={() => setIsAntibioticsModalOpen(true)}
-          onOpenInjectablesModal={() => setIsInjectableModalOpen(true)}
-        />
-        <AntibioticsModal
-          isOpen={isAntibioticsModalOpen}
-          onClose={() => setIsAntibioticsModalOpen(false)}
-          onAddAntibiotic={handleAddAntibiotic}
-        />
-        <InjectableModal
-          isOpen={isInjectableModalOpen}
-          onClose={() => setIsInjectableModalOpen(false)}
-          onAddMedication={handleAddInjectable}
-        />
-        <PrescriptionModelsModal
-          isOpen={isModelsModalOpen}
-          onClose={() => setIsModelsModalOpen(false)}
-          prescriptions={prescriptions}
-          onApplyModel={handleApplyModel}
-        />
+        <PrescriptionActions onAddRow={addRow} onOpenAntibioticsModal={() => setIsAntibioticsModalOpen(true)} onOpenInjectablesModal={() => setIsInjectableModalOpen(true)} />
+        <AntibioticsModal isOpen={isAntibioticsModalOpen} onClose={() => setIsAntibioticsModalOpen(false)} onAddAntibiotic={handleAddAntibiotic} />
+        <InjectableModal isOpen={isInjectableModalOpen} onClose={() => setIsInjectableModalOpen(false)} onAddMedication={handleAddInjectable} />
+        <PrescriptionModelsModal isOpen={isModelsModalOpen} onClose={() => setIsModelsModalOpen(false)} prescriptions={prescriptions} onApplyModel={handleApplyModel} />
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default PrescriptionTable;
