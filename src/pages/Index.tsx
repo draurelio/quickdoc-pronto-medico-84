@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PatientHeader, { PatientData } from '@/components/PatientHeader';
@@ -7,7 +6,6 @@ import MedicalForm, { MedicalFormData } from '@/components/MedicalForm';
 import DocumentGenerator from '@/components/DocumentGenerator';
 import { Toaster } from "@/components/ui/toaster";
 import { Card, CardContent } from "@/components/ui/card";
-
 const Index = () => {
   const [patientData, setPatientData] = useState<PatientData>({
     name: '',
@@ -16,32 +14,26 @@ const Index = () => {
     currentDate: new Date().toISOString().split('T')[0],
     diagnosis: '',
     allergies: '',
-    origin: '',
+    origin: ''
   });
-
-  const [prescriptionData, setPrescriptionData] = useState<PrescriptionItem[]>([
-    { 
-      id: '1', 
-      medication: '', 
-      dose: '', 
-      route: '', 
-      frequency: '', 
-      notes: '', 
-      time: '' 
-    }
-  ]);
-
+  const [prescriptionData, setPrescriptionData] = useState<PrescriptionItem[]>([{
+    id: '1',
+    medication: '',
+    dose: '',
+    route: '',
+    frequency: '',
+    notes: '',
+    time: ''
+  }]);
   const [medicalData, setMedicalData] = useState<MedicalFormData>({
     admission: '',
     comorbidities: '',
     medicationReason: '',
     physicalExam: '',
     analysis: '',
-    plans: '',
+    plans: ''
   });
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       <header className="bg-gradient-to-r from-medblue-700 via-medblue-600 to-medblue-500 text-white py-4 px-6 shadow-lg sticky top-0 z-10">
         <div className="container flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -49,8 +41,8 @@ const Index = () => {
               <img src="/lovable-uploads/hospital-logo.png" alt="Hospital Dr. Aurélio" className="h-14 filter drop-shadow-md" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold drop-shadow-sm">QuickDoc: Prontuário Médico</h1>
-              <p className="text-sm text-white/90 font-medium">Sistema Integrado de Gerenciamento Médico</p>
+              <h1 className="drop-shadow-sm text-center text-gray-50 font-extrabold text-5xl">QuickDOC</h1>
+              <p className="text-white/90 font-medium text-left text-sm">Sistema de Prontuários Médicos Digitais</p>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm py-2 px-4 rounded-full shadow-inner">
@@ -95,11 +87,7 @@ const Index = () => {
                 <h2 className="text-lg font-semibold text-medblue-800">Gerar Documentação</h2>
               </div>
               <CardContent className="p-6">
-                <DocumentGenerator 
-                  patientData={patientData} 
-                  prescriptionData={prescriptionData} 
-                  medicalData={medicalData} 
-                />
+                <DocumentGenerator patientData={patientData} prescriptionData={prescriptionData} medicalData={medicalData} />
               </CardContent>
             </Card>
           </div>
@@ -121,8 +109,6 @@ const Index = () => {
       </footer>
       
       <Toaster />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
