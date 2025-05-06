@@ -154,11 +154,12 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
         <table class="table">
           <thead>
             <tr>
-              <th>Medicamento</th>
-              <th>Dosagem</th>
+              <th>Medicação</th>
+              <th>Dose</th>
               <th>Via</th>
               <th>Posologia</th>
-              <th>Horário</th>
+              <th>Observação</th>
+              <th>Horários</th>
             </tr>
           </thead>
           <tbody>
@@ -168,6 +169,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
                 <td>${item.dose}</td>
                 <td>${item.route}</td>
                 <td>${item.frequency}</td>
+                <td>${item.notes}</td>
                 <td>${item.time}</td>
               </tr>
             `).join('')}
@@ -182,12 +184,12 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
         <table class="table">
           <thead>
             <tr>
-              <th>Medicamento</th>
-              <th>Dosagem</th>
+              <th>Medicação</th>
+              <th>Dose</th>
               <th>Via</th>
               <th>Posologia</th>
               <th>Observação</th>
-              <th>Horário</th>
+              <th>Horários</th>
             </tr>
           </thead>
           <tbody>
