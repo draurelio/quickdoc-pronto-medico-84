@@ -3,6 +3,10 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { FilePlus } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import MedicalModelsModal from './medical/MedicalModelsModal';
 
 export interface MedicalFormData {
   admission: string;
@@ -27,105 +31,86 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
     plans: '',
   });
 
+  const [isModelModalOpen, setIsModelModalOpen] = useState(false);
+  const [currentField, setCurrentField] = useState<keyof MedicalFormData | null>(null);
+
   const handleChange = (field: keyof MedicalFormData, value: string) => {
     const updatedData = { ...formData, [field]: value };
     setFormData(updatedData);
     onDataChange(updatedData);
   };
 
+  const openModelModal = (field: keyof MedicalFormData) => {
+    setCurrentField(field);
+    setIsModelModalOpen(true);
+  };
+
+  const handleApplyModel = (field: keyof MedicalFormData, content: string) => {
+    handleChange(field, content);
+    setIsModelModalOpen(false);
+  };
+
+  const fieldLabels: Record<keyof MedicalFormData, string> = {
+    admission: 'Admissão',
+    comorbidities: 'Comorbidades',
+    medicationReason: 'MUC (Medicação de uso contínuo)',
+    physicalExam: 'Exame Físico',
+    analysis: 'Análise',
+    plans: 'Condutas'
+  };
+
+  const renderField = (field: keyof MedicalFormData) => (
+    <div className="w-full mb-6">
+      <div className="flex justify-between items-center mb-1">
+        <Label htmlFor={field} className="text-sm font-medium block">
+          {fieldLabels[field]}
+        </Label>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-8 text-xs bg-medblue-50 border-medblue-200 text-medblue-600 hover:bg-medblue-100"
+          onClick={() => openModelModal(field)}
+        >
+          <FilePlus className="h-3.5 w-3.5 mr-1" /> Modelos
+        </Button>
+      </div>
+      <Textarea 
+        id={field}
+        rows={3}
+        value={formData[field]}
+        onChange={(e) => handleChange(field, e.target.value)}
+        placeholder={`Insira ${fieldLabels[field].toLowerCase()} aqui...`}
+        className="min-h-[120px] w-full"
+      />
+    </div>
+  );
+
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-xl text-medblue-600">Admissão Médica e Evolução</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-5">
-          <div className="w-full">
-            <Label htmlFor="admission" className="text-sm font-medium mb-1 block">
-              Admissão
-            </Label>
-            <Textarea 
-              id="admission"
-              rows={3}
-              value={formData.admission}
-              onChange={(e) => handleChange('admission', e.target.value)}
-              placeholder="Histórico de admissão do paciente"
-              className="min-h-[120px] w-full"
-            />
+    <>
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-xl text-medblue-600">Admissão Médica e Evolução</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1">
+            {renderField('admission')}
+            {renderField('comorbidities')}
+            {renderField('medicationReason')}
+            {renderField('physicalExam')}
+            {renderField('analysis')}
+            {renderField('plans')}
           </div>
-          
-          <div className="w-full">
-            <Label htmlFor="comorbidities" className="text-sm font-medium mb-1 block">
-              Comorbidades
-            </Label>
-            <Textarea 
-              id="comorbidities"
-              rows={3}
-              value={formData.comorbidities}
-              onChange={(e) => handleChange('comorbidities', e.target.value)}
-              placeholder="Comorbidades do paciente"
-              className="min-h-[120px] w-full"
-            />
-          </div>
-          
-          <div className="w-full">
-            <Label htmlFor="medicationReason" className="text-sm font-medium mb-1 block">
-              MUC (Medicação de uso contínuo)
-            </Label>
-            <Textarea 
-              id="medicationReason"
-              rows={3}
-              value={formData.medicationReason}
-              onChange={(e) => handleChange('medicationReason', e.target.value)}
-              placeholder="Motivos para uso da medicação"
-              className="min-h-[120px] w-full"
-            />
-          </div>
-          
-          <div className="w-full">
-            <Label htmlFor="physicalExam" className="text-sm font-medium mb-1 block">
-              Exame Físico
-            </Label>
-            <Textarea 
-              id="physicalExam"
-              rows={3}
-              value={formData.physicalExam}
-              onChange={(e) => handleChange('physicalExam', e.target.value)}
-              placeholder="Resultados do exame físico"
-              className="min-h-[120px] w-full"
-            />
-          </div>
-          
-          <div className="w-full">
-            <Label htmlFor="analysis" className="text-sm font-medium mb-1 block">
-              Análise
-            </Label>
-            <Textarea 
-              id="analysis"
-              rows={3}
-              value={formData.analysis}
-              onChange={(e) => handleChange('analysis', e.target.value)}
-              placeholder="Análise geral da situação do paciente"
-              className="min-h-[120px] w-full"
-            />
-          </div>
-          
-          <div className="w-full">
-            <Label htmlFor="plans" className="text-sm font-medium mb-1 block">
-              Condutas
-            </Label>
-            <Textarea 
-              id="plans"
-              rows={3}
-              value={formData.plans}
-              onChange={(e) => handleChange('plans', e.target.value)}
-              placeholder="Condutas e planos de tratamento"
-              className="min-h-[120px] w-full"
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <MedicalModelsModal 
+        isOpen={isModelModalOpen}
+        onClose={() => setIsModelModalOpen(false)}
+        currentField={currentField}
+        fieldValue={currentField ? formData[currentField] : ''}
+        onApplyModel={handleApplyModel}
+      />
+    </>
   );
 };
 
