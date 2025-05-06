@@ -38,11 +38,11 @@ const Index = () => {
         <div className="container flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-1.5 bg-white/20 rounded-lg shadow-inner backdrop-blur-sm">
-              <img src="/lovable-uploads/hospital-logo.png" alt="Hospital Dr. Aurélio" className="h-14 filter drop-shadow-md" />
+              <img src="/lovable-uploads/hospital-logo.png" alt="Hospital Dr. Aurélio" className="h-14 filter drop-shadow-md object-fill" />
             </div>
             <div>
               <h1 className="drop-shadow-sm text-center text-gray-50 font-extrabold text-5xl">QuickDOC</h1>
-              <p className="text-white/90 font-medium text-left text-sm">Sistema de Prontuários Médicos Digitais</p>
+              <p className="text-white/90 font-medium text-sm text-center">Prontuários Médicos Digitais</p>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm py-2 px-4 rounded-full shadow-inner">
