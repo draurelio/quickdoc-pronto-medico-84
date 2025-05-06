@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { PatientData } from "./PatientHeader";
@@ -23,7 +22,7 @@ interface DocumentData {
   patient: PatientData;
   prescription: PrescriptionItem[];
   medical: MedicalFormData;
-  antibiotics?: Antibiotic[];
+  antibiotics?: OralMedication[];
 }
 
 const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
