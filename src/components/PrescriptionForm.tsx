@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Antibiotic } from '../data/antibioticsData';
+import { OralMedication } from '../data/antibioticsData';
 import AntibioticsModal from './AntibioticsModal';
 import { PrescriptionItem } from './PrescriptionTable';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +15,7 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({ onSubmit }) => {
   ]);
   const { toast } = useToast();
 
-  const handleAddAntibiotic = (antibiotic: Antibiotic) => {
+  const handleAddAntibiotic = (antibiotic: OralMedication) => {
     const newPrescription: PrescriptionItem = {
       id: crypto.randomUUID(),
       medication: typeof antibiotic.name === 'string' ? antibiotic.name : Array.isArray(antibiotic.name) ? antibiotic.name[0] : '',

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { PatientData } from "./PatientHeader";
@@ -7,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { generateDocxFromTemplate } from "../utils/documentTemplate";
 import { toast } from "@/components/ui/use-toast";
 import { FileText } from "lucide-react";
-import { Antibiotic } from '../data/antibioticsData';
+import { OralMedication } from '../data/antibioticsData';
 import { formatDate } from '../utils/formatUtils';
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
