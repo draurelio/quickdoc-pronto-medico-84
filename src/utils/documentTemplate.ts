@@ -1,3 +1,4 @@
+
 import { DocumentData } from "./documentHtmlGenerator";
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
@@ -74,4 +75,4 @@ export const generateDocxFromTemplate = async (data: DocumentData) => {
     console.error("Erro ao gerar documento:", error);
     throw error;
   }
-}; 
+};
