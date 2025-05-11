@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PatientHeader, { PatientData } from '@/components/PatientHeader';
@@ -6,6 +7,8 @@ import MedicalForm, { MedicalFormData } from '@/components/MedicalForm';
 import DocumentGenerator from '@/components/DocumentGenerator';
 import { Toaster } from "@/components/ui/toaster";
 import { Card, CardContent } from "@/components/ui/card";
+import HoverSidebar from '@/components/HoverSidebar';
+
 const Index = () => {
   const [patientData, setPatientData] = useState<PatientData>({
     name: '',
@@ -16,6 +19,7 @@ const Index = () => {
     allergies: '',
     origin: ''
   });
+  
   const [prescriptionData, setPrescriptionData] = useState<PrescriptionItem[]>([{
     id: '1',
     medication: '',
@@ -25,6 +29,7 @@ const Index = () => {
     notes: '',
     time: ''
   }]);
+  
   const [medicalData, setMedicalData] = useState<MedicalFormData>({
     admission: '',
     comorbidities: '',
@@ -33,7 +38,9 @@ const Index = () => {
     analysis: '',
     plans: ''
   });
-  return <div className="min-h-screen bg-gray-50">
+  
+  return (
+    <div className="min-h-screen bg-gray-50">
       <header className="bg-gradient-to-r from-medblue-700 via-medblue-600 to-medblue-500 text-white py-4 px-6 shadow-lg sticky top-0 z-10">
         <div className="container flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -108,7 +115,11 @@ const Index = () => {
         </div>
       </footer>
       
+      <HoverSidebar />
+      
       <Toaster />
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
