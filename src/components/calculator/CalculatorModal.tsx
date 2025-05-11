@@ -275,7 +275,7 @@ const CalculatorModal = ({ open, onOpenChange }: { open: boolean; onOpenChange: 
               .
             </Button>
             <Button 
-              variant="primary" 
+              variant="default" 
               className="h-12 bg-medblue-500 text-white hover:bg-medblue-600"
               onClick={calculateResult}
             >
