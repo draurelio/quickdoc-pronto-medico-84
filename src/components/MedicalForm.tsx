@@ -132,16 +132,18 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
           {fieldLabels[field]}
         </Label>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="h-8 text-xs bg-gradient-to-r from-purple-50 to-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
-            onClick={() => improveText(field)}
-            disabled={isImproving !== null}
-          >
-            <Wand2 className="h-3.5 w-3.5 mr-1" /> 
-            {isImproving === field ? 'Melhorando...' : 'Melhorar texto'}
-          </Button>
+          {field === 'admission' && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-8 text-xs bg-gradient-to-r from-purple-50 to-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+              onClick={() => improveText(field)}
+              disabled={isImproving !== null}
+            >
+              <Wand2 className="h-3.5 w-3.5 mr-1" /> 
+              {isImproving === field ? 'Melhorando...' : 'Melhorar texto'}
+            </Button>
+          )}
           <Button 
             variant="outline" 
             size="sm" 
