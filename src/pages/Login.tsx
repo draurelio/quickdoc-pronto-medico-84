@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
@@ -55,10 +56,10 @@ const Login = () => {
 
       toast({
         title: "Login realizado com sucesso",
-        description: "Você será redirecionado para o dashboard.",
+        description: "Você será redirecionado para a página inicial.",
       });
       
-      navigate('/dashboard');
+      navigate('/');
     } catch (error: any) {
       toast({
         title: "Erro ao fazer login",

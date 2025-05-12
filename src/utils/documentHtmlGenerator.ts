@@ -57,7 +57,6 @@ export const generateMedicalRecordHtml = (data: DocumentData): string => {
         .medical-info {
           display: flex;
           flex-direction: column;
-          text-align: left;
         }
         .medical-info-row {
           display: flex;
@@ -69,10 +68,6 @@ export const generateMedicalRecordHtml = (data: DocumentData): string => {
           padding: 4px;
           border-left: 1px solid #ccc;
           border-right: 1px solid #ccc;
-          text-align: left;
-        }
-        .medical-info div {
-          text-align: left;
         }
         .prescription-table {
           width: 100%;
@@ -81,7 +76,6 @@ export const generateMedicalRecordHtml = (data: DocumentData): string => {
         .prescription-table th, .prescription-table td {
           border: 1px solid #ccc;
           padding: 4px;
-          text-align: left;
         }
         .prescription-table th {
           background-color: #e6e6e6;
@@ -131,25 +125,25 @@ export const generateMedicalRecordHtml = (data: DocumentData): string => {
           <th class="section-header" colspan="6">MEDICAÇÃO</th>
         </tr>
         <tr>
-          <td style="vertical-align: top; border-right: 1px solid #ccc; text-align: left;" rowspan="18">
+          <td style="vertical-align: top; border-right: 1px solid #ccc;" rowspan="18">
             <div class="medical-info">
               <div><strong>ADMISSÃO:</strong></div>
-              <div style="margin-bottom: 10px; text-align: left;">${medical.admission || ''}</div>
+              <div style="margin-bottom: 10px;">${medical.admission || ''}</div>
               
               <div><strong>COMORBIDADES:</strong></div>
-              <div style="margin-bottom: 10px; text-align: left;">${medical.comorbidities || ''}</div>
+              <div style="margin-bottom: 10px;">${medical.comorbidities || ''}</div>
               
               <div><strong>MUC:</strong></div>
-              <div style="margin-bottom: 10px; text-align: left;">${medical.medicationReason || ''}</div>
+              <div style="margin-bottom: 10px;">${medical.medicationReason || ''}</div>
               
               <div><strong>EXAME FÍSICO:</strong></div>
-              <div style="margin-bottom: 10px; text-align: left;">${medical.physicalExam || ''}</div>
+              <div style="margin-bottom: 10px;">${medical.physicalExam || ''}</div>
               
               <div><strong>ANÁLISE:</strong></div>
-              <div style="margin-bottom: 10px; text-align: left;">${medical.analysis || ''}</div>
+              <div style="margin-bottom: 10px;">${medical.analysis || ''}</div>
               
               <div><strong>CONDUTAS:</strong></div>
-              <div style="text-align: left;">${medical.plans || ''}</div>
+              <div>${medical.plans || ''}</div>
             </div>
           </td>
           <th style="text-align: center;">#</th>
@@ -177,12 +171,12 @@ const generatePrescriptionRows = (prescriptions: PrescriptionItem[]): string => 
   return prescriptions.map((item, index) => `
     <tr>
       <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${index + 1}</td>
-      <td style="border: 1px solid #ccc; padding: 4px; text-align: left;">${item.medication || ''}</td>
-      <td style="border: 1px solid #ccc; padding: 4px; text-align: left;">${item.dose || ''}</td>
-      <td style="border: 1px solid #ccc; padding: 4px; text-align: left;">${item.route || ''}</td>
-      <td style="border: 1px solid #ccc; padding: 4px; text-align: left;">${item.frequency || ''}</td>
-      <td style="border: 1px solid #ccc; padding: 4px; text-align: left;">${item.notes || ''}</td>
-      <td style="border: 1px solid #ccc; padding: 4px; text-align: left;">${item.time || ''}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.medication || ''}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.dose || ''}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.route || ''}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.frequency || ''}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.notes || ''}</td>
+      <td style="border: 1px solid #ccc; padding: 4px;">${item.time || ''}</td>
     </tr>
   `).join('');
 };

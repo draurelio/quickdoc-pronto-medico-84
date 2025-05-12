@@ -52,31 +52,18 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
           
         if (error) throw error;
         
-        if (data) {
-          const typedModels: MedicalModel[] = data.map(item => ({
-            id: item.id,
-            name: item.name,
-            field: item.field as keyof MedicalFormData,
-            content: item.content
-          }));
-          setModels(typedModels);
-        }
+        setModels(data?.map(item => ({
+          id: item.id,
+          name: item.name,
+          field: item.field,
+          content: item.content
+        })) || []);
       } else {
         // Fallback para localStorage se não estiver autenticado
         const saved = localStorage.getItem('medical_models');
         if (saved) {
           const allModels = JSON.parse(saved);
-          const filteredModels = allModels.filter(
-            (model: any) => model.field === currentField
-          );
-          
-          // Garantir que field seja do tipo correto
-          const typedModels: MedicalModel[] = filteredModels.map((model: any) => ({
-            ...model,
-            field: model.field as keyof MedicalFormData
-          }));
-          
-          setModels(typedModels);
+          setModels(allModels.filter((model: MedicalModel) => model.field === currentField));
         }
       }
     } catch (error) {
@@ -121,14 +108,15 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
         if (error) throw error;
         
         if (data && data[0]) {
-          const newModel: MedicalModel = {
-            id: data[0].id,
-            name: data[0].name,
-            field: data[0].field as keyof MedicalFormData,
-            content: data[0].content
-          };
-          
-          setModels([newModel, ...models]);
+          setModels([
+            {
+              id: data[0].id,
+              name: data[0].name,
+              field: data[0].field,
+              content: data[0].content
+            },
+            ...models
+          ]);
           
           toast({
             title: 'Modelo salvo',
@@ -137,7 +125,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
         }
       } else {
         // Fallback para localStorage
-        const newModel: MedicalModel = {
+        const newModel = {
           id: crypto.randomUUID(),
           name: modelName.trim(),
           field: currentField,

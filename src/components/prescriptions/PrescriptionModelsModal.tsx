@@ -5,7 +5,6 @@ import { X, Trash2, Save, FilePlus, Edit, Check } from 'lucide-react';
 import { PrescriptionItem } from '../PrescriptionTable';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { Json } from '@/integrations/supabase/types';
 
 interface PrescriptionModelsModal {
   isOpen: boolean;
@@ -42,21 +41,15 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
           
         if (error) throw error;
         
-        if (data) {
-          const typedModels: PrescriptionModel[] = data.map(item => ({
-            id: item.id,
-            name: item.name,
-            prescriptions: item.prescriptions as unknown as PrescriptionItem[]
-          }));
-          setModels(typedModels);
-        }
+        setModels(data?.map(item => ({
+          id: item.id,
+          name: item.name,
+          prescriptions: item.prescriptions
+        })) || []);
       } else {
         // Fallback para localStorage se não estiver autenticado
         const saved = localStorage.getItem('prescription_models');
-        if (saved) {
-          const savedModels = JSON.parse(saved);
-          setModels(savedModels);
-        }
+        if (saved) setModels(JSON.parse(saved));
       }
     } catch (error) {
       console.error('Erro ao carregar modelos:', error);
@@ -87,12 +80,12 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
       const { data: session } = await supabase.auth.getSession();
       
       if (session?.session?.user) {
-        // Fix: Type conversions for Supabase insert
+        // Salvar no Supabase
         const { data, error } = await supabase
           .from('prescription_models')
           .insert({
             name: modelName.trim(),
-            prescriptions: modelPrescriptions as unknown as Json,
+            prescriptions: modelPrescriptions,
             user_id: session.session.user.id
           })
           .select();
@@ -100,13 +93,14 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
         if (error) throw error;
         
         if (data && data[0]) {
-          const newModel: PrescriptionModel = {
-            id: data[0].id,
-            name: data[0].name,
-            prescriptions: data[0].prescriptions as unknown as PrescriptionItem[]
-          };
-          
-          setModels([newModel, ...models]);
+          setModels([
+            {
+              id: data[0].id,
+              name: data[0].name,
+              prescriptions: data[0].prescriptions
+            },
+            ...models
+          ]);
           
           toast({
             title: 'Modelo salvo',
@@ -115,7 +109,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
         }
       } else {
         // Fallback para localStorage
-        const newModel: PrescriptionModel = {
+        const newModel = {
           id: crypto.randomUUID(),
           name: modelName.trim(),
           prescriptions: modelPrescriptions
