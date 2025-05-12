@@ -12,6 +12,7 @@ import { OralMedication } from '../data/antibioticsData';
 import { formatDate } from '../utils/formatUtils';
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
+import { Json } from '@/integrations/supabase/types';
 
 interface DocumentGeneratorProps {
   patientData: PatientData;
@@ -58,18 +59,19 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
         return false;
       }
       
+      // Fix: Convert complex objects to JSON-compatible format
       const { data, error } = await supabase
         .from('prescriptions')
-        .insert([{
+        .insert({
           user_id: session.session.user.id,
           patient_name: patientData.name,
           patient_age: patientData.age,
           admission_date: patientData.admissionDate,
           diagnosis: patientData.diagnosis,
-          prescription_data: prescriptionData,
-          medical_data: medicalData,
-          patient_data: patientData
-        }]);
+          prescription_data: prescriptionData as unknown as Json,
+          medical_data: medicalData as unknown as Json,
+          patient_data: patientData as unknown as Json
+        });
       
       if (error) {
         console.error("Erro ao salvar prescrição:", error);

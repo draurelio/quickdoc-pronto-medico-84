@@ -5,6 +5,7 @@ import { X, Trash2, Save, FilePlus, Edit, Check } from 'lucide-react';
 import { PrescriptionItem } from '../PrescriptionTable';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { Json } from '@/integrations/supabase/types';
 
 interface PrescriptionModelsModal {
   isOpen: boolean;
@@ -86,14 +87,14 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
       const { data: session } = await supabase.auth.getSession();
       
       if (session?.session?.user) {
-        // Salvar no Supabase
+        // Fix: Type conversions for Supabase insert
         const { data, error } = await supabase
           .from('prescription_models')
-          .insert([{
+          .insert({
             name: modelName.trim(),
-            prescriptions: modelPrescriptions,
+            prescriptions: modelPrescriptions as unknown as Json,
             user_id: session.session.user.id
-          }])
+          })
           .select();
           
         if (error) throw error;
