@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { PatientData } from "./PatientHeader";
@@ -59,7 +60,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
       
       const { data, error } = await supabase
         .from('prescriptions')
-        .insert({
+        .insert([{
           user_id: session.session.user.id,
           patient_name: patientData.name,
           patient_age: patientData.age,
@@ -68,7 +69,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
           prescription_data: prescriptionData,
           medical_data: medicalData,
           patient_data: patientData
-        });
+        }]);
       
       if (error) {
         console.error("Erro ao salvar prescrição:", error);

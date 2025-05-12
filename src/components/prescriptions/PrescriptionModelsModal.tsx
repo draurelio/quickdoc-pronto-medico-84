@@ -41,15 +41,21 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
           
         if (error) throw error;
         
-        setModels(data?.map(item => ({
-          id: item.id,
-          name: item.name,
-          prescriptions: item.prescriptions
-        })) || []);
+        if (data) {
+          const typedModels: PrescriptionModel[] = data.map(item => ({
+            id: item.id,
+            name: item.name,
+            prescriptions: item.prescriptions as unknown as PrescriptionItem[]
+          }));
+          setModels(typedModels);
+        }
       } else {
         // Fallback para localStorage se não estiver autenticado
         const saved = localStorage.getItem('prescription_models');
-        if (saved) setModels(JSON.parse(saved));
+        if (saved) {
+          const savedModels = JSON.parse(saved);
+          setModels(savedModels);
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar modelos:', error);
@@ -83,24 +89,23 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
         // Salvar no Supabase
         const { data, error } = await supabase
           .from('prescription_models')
-          .insert({
+          .insert([{
             name: modelName.trim(),
             prescriptions: modelPrescriptions,
             user_id: session.session.user.id
-          })
+          }])
           .select();
           
         if (error) throw error;
         
         if (data && data[0]) {
-          setModels([
-            {
-              id: data[0].id,
-              name: data[0].name,
-              prescriptions: data[0].prescriptions
-            },
-            ...models
-          ]);
+          const newModel: PrescriptionModel = {
+            id: data[0].id,
+            name: data[0].name,
+            prescriptions: data[0].prescriptions as unknown as PrescriptionItem[]
+          };
+          
+          setModels([newModel, ...models]);
           
           toast({
             title: 'Modelo salvo',
@@ -109,7 +114,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
         }
       } else {
         // Fallback para localStorage
-        const newModel = {
+        const newModel: PrescriptionModel = {
           id: crypto.randomUUID(),
           name: modelName.trim(),
           prescriptions: modelPrescriptions
