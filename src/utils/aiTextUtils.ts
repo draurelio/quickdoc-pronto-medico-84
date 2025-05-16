@@ -7,6 +7,10 @@ export interface ImprovedTextResponse {
   success: boolean;
 }
 
+// Chave da API Gemini do Google
+const GEMINI_API_KEY = "AIzaSyAo8qRthzx1-qAdkisrBpiG7ZnvtXeTOCo";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
 export const improveTextWithAI = async (text: string): Promise<ImprovedTextResponse> => {
   if (!text.trim()) {
     toast({
@@ -18,35 +22,56 @@ export const improveTextWithAI = async (text: string): Promise<ImprovedTextRespo
   }
 
   try {
-    // Chamada para função do Supabase Edge Function que faz a integração com IA
-    // Esta função precisará ser criada no Supabase posteriormente
-    const { data, error } = await supabase.functions.invoke('improve-text', {
-      body: { text }
+    const prompt = `
+      Você é um assistente especializado em textos médicos em português. 
+      Por favor, revise e melhore o seguinte texto médico, corrigindo erros gramaticais, 
+      melhorando a fluência e o vocabulário médico, mas mantenha o significado original:
+      
+      "${text}"
+      
+      Forneça apenas o texto melhorado, sem comentários adicionais.
+    `;
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }]
+      }),
     });
 
-    if (error) {
-      console.error("Erro ao melhorar texto:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível melhorar o texto. Tente novamente mais tarde.",
-        variant: "destructive",
-      });
-      return { improvedText: "", success: false };
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Erro na resposta da API Gemini:", errorData);
+      throw new Error(`Erro na API: ${response.status}`);
     }
 
-    return { improvedText: data.improvedText, success: true };
+    const data = await response.json();
+    
+    // Extrair o texto melhorado da resposta da API Gemini
+    const improvedText = data.candidates[0]?.content?.parts[0]?.text || "";
+    
+    if (!improvedText) {
+      throw new Error("Não foi possível extrair o texto melhorado da resposta da API");
+    }
+
+    return { improvedText, success: true };
   } catch (error) {
-    console.error("Erro ao melhorar texto:", error);
+    console.error("Erro ao melhorar texto com API Gemini:", error);
     toast({
       title: "Erro",
-      description: "Ocorreu um erro ao processar sua solicitação.",
+      description: "Ocorreu um erro ao processar sua solicitação com a IA.",
       variant: "destructive",
     });
     return { improvedText: "", success: false };
   }
 };
 
-// Implementação temporária para demonstração, até que a Edge Function seja criada
+// Mantemos a função mock como fallback caso haja problemas com a API
 export const mockImproveText = (text: string): Promise<ImprovedTextResponse> => {
   return new Promise((resolve) => {
     setTimeout(() => {

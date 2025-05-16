@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FilePlus, Wand2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import MedicalModelsModal from './medical/MedicalModelsModal';
-import { mockImproveText } from '@/utils/aiTextUtils';
+import { improveTextWithAI } from '@/utils/aiTextUtils';
 
 export interface MedicalFormData {
   admission: string;
@@ -66,16 +66,15 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
     setIsImproving(field);
     
     try {
-      // Utilizando a versão mock para demonstração
-      // Em produção, usar improveTextWithAI
-      const { improvedText, success } = await mockImproveText(formData[field]);
+      // Agora usando a API real Gemini em vez do mock
+      const { improvedText, success } = await improveTextWithAI(formData[field]);
       
-      if (success) {
+      if (success && improvedText) {
         setImprovedTexts((prev) => ({ ...prev, [field]: improvedText }));
         
         toast({
           title: "Texto melhorado",
-          description: "O texto foi melhorado com sucesso!",
+          description: "O texto foi melhorado com sucesso pela IA!",
         });
       }
     } catch (error) {
@@ -139,9 +138,19 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
         <div className="mt-3 p-3 border border-green-200 bg-green-50 rounded-md">
           <div className="mb-1 flex items-center">
             <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
-            <span className="text-xs font-medium text-green-700">Texto melhorado</span>
+            <span className="text-xs font-medium text-green-700">Texto melhorado pela IA</span>
           </div>
           <p className="text-sm text-gray-700">{improvedTexts[field]}</p>
+          <div className="mt-2 flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs bg-green-100 border-green-300 text-green-700 hover:bg-green-200"
+              onClick={() => handleChange(field, improvedTexts[field] || '')}
+            >
+              Aplicar texto melhorado
+            </Button>
+          </div>
         </div>
       )}
     </div>
