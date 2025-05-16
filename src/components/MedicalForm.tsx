@@ -44,7 +44,7 @@ function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: s
 
       mediaRecorder.onstop = async () => {
         setLoading(true);
-        const audioBlob = new Blob(audioChunks.current, { type: "audio/mp3" });
+        const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
         try {
           // 1. Upload audio
           const uploadRes = await axios.post(
@@ -78,11 +78,13 @@ function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: s
               completed = true;
             } else if (pollRes.data.status === "error") {
               alert("Erro na transcrição: " + pollRes.data.error);
+              console.error("Erro detalhado:", pollRes.data);
               completed = true;
             }
           }
         } catch (err) {
-          alert("Erro ao transcrever áudio");
+          alert("Erro ao transcrever áudio: " + (err?.message || JSON.stringify(err)));
+          console.error("Erro detalhado:", err);
         }
         setLoading(false);
       };
