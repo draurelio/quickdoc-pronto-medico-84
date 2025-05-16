@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { FilePlus, Wand2 } from "lucide-react";
+import { FilePlus, Wand2, Mic } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import MedicalModelsModal from './medical/MedicalModelsModal';
 import { improveTextWithAI, mockImproveText } from '@/utils/aiTextUtils';
+import axios from "axios";
 
 export interface MedicalFormData {
   admission: string;
@@ -20,6 +20,99 @@ export interface MedicalFormData {
 
 interface MedicalFormProps {
   onDataChange: (data: MedicalFormData) => void;
+}
+
+const ASSEMBLYAI_API_KEY = "5749f2947b544ff89f8dad00858f287b";
+const BASE_URL = "https://api.assemblyai.com/v2";
+
+function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: string) => void }) {
+  const [recording, setRecording] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const audioChunks = React.useRef<Blob[]>([]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new window.MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunks.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        setLoading(true);
+        const audioBlob = new Blob(audioChunks.current, { type: "audio/mp3" });
+        try {
+          // 1. Upload audio
+          const uploadRes = await axios.post(
+            `${BASE_URL}/upload`,
+            audioBlob,
+            {
+              headers: {
+                authorization: ASSEMBLYAI_API_KEY,
+                "content-type": "application/octet-stream",
+              },
+            }
+          );
+          const audioUrl = uploadRes.data.upload_url;
+          // 2. Request transcription
+          const transcriptRes = await axios.post(
+            `${BASE_URL}/transcript`,
+            { audio_url: audioUrl },
+            { headers: { authorization: ASSEMBLYAI_API_KEY } }
+          );
+          const transcriptId = transcriptRes.data.id;
+          // 3. Polling
+          let completed = false;
+          while (!completed) {
+            await new Promise((res) => setTimeout(res, 3000));
+            const pollRes = await axios.get(
+              `${BASE_URL}/transcript/${transcriptId}`,
+              { headers: { authorization: ASSEMBLYAI_API_KEY } }
+            );
+            if (pollRes.data.status === "completed") {
+              onChange((value ? value + " " : "") + pollRes.data.text);
+              completed = true;
+            } else if (pollRes.data.status === "error") {
+              alert("Erro na transcrição: " + pollRes.data.error);
+              completed = true;
+            }
+          }
+        } catch (err) {
+          alert("Erro ao transcrever áudio");
+        }
+        setLoading(false);
+      };
+      mediaRecorder.start();
+      setRecording(true);
+    } catch (err) {
+      alert("Microfone não encontrado ou permissão negada. Verifique as configurações do navegador e tente novamente.");
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setRecording(false);
+  };
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="icon"
+      className={recording ? "bg-red-100 border-red-300 text-red-700" : "bg-blue-50 border-blue-200 text-blue-600"}
+      onClick={recording ? stopRecording : startRecording}
+      disabled={loading}
+      title={recording ? "Parar gravação" : "Gravar áudio"}
+      style={{ marginLeft: 8 }}
+    >
+      <Mic className="h-4 w-4" />
+      <span className="sr-only">Microfone</span>
+    </Button>
+  );
 }
 
 const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
@@ -138,6 +231,9 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
           {fieldLabels[field]}
         </Label>
         <div className="flex gap-2">
+          {field === 'admission' && (
+            <AudioToTextButton value={formData.admission} onChange={v => handleChange('admission', v)} />
+          )}
           <Button 
             variant="outline" 
             size="sm" 
