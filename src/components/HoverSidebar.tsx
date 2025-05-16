@@ -1,11 +1,12 @@
-
 import React, { useState } from 'react';
-import { Calculator } from 'lucide-react';
+import { Calculator, MessageCircle } from 'lucide-react';
 import CalculatorModal from './calculator/CalculatorModal';
+import ChatDrawer from './ChatDrawer';
 
 const HoverSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
     <>
@@ -31,6 +32,14 @@ const HoverSidebar = () => {
               <Calculator className="w-5 h-5" />
               <span className="text-xs mt-1">Calc</span>
             </button>
+            <button
+              onClick={() => setIsChatOpen(true)}
+              className="flex flex-col items-center justify-center w-10 h-10 bg-medblue-50 hover:bg-medblue-100 rounded-md text-medblue-600 transition-colors"
+              title="Chat IA"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span className="text-xs mt-1">Chat</span>
+            </button>
           </div>
         </div>
       </div>
@@ -38,6 +47,10 @@ const HoverSidebar = () => {
       <CalculatorModal 
         open={isCalculatorOpen} 
         onOpenChange={setIsCalculatorOpen} 
+      />
+      <ChatDrawer 
+        open={isChatOpen}
+        onOpenChange={setIsChatOpen}
       />
     </>
   );
