@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FilePlus, Wand2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import MedicalModelsModal from './medical/MedicalModelsModal';
-import { improveTextWithAI } from '@/utils/aiTextUtils';
+import { improveTextWithAI, mockImproveText } from '@/utils/aiTextUtils';
 
 export interface MedicalFormData {
   admission: string;
@@ -64,26 +64,59 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
     }
 
     setIsImproving(field);
+    console.log(`Tentando melhorar texto para o campo: ${field}`);
     
     try {
-      // Agora usando a API real Gemini em vez do mock
-      const { improvedText, success } = await improveTextWithAI(formData[field]);
+      // Tente primeiro a API real Gemini
+      console.log("Chamando a API Gemini para melhoria de texto");
+      const result = await improveTextWithAI(formData[field]);
       
-      if (success && improvedText) {
-        setImprovedTexts((prev) => ({ ...prev, [field]: improvedText }));
+      if (result.success && result.improvedText) {
+        console.log("Texto melhorado com sucesso:", result.improvedText);
+        setImprovedTexts((prev) => ({ ...prev, [field]: result.improvedText }));
         
         toast({
           title: "Texto melhorado",
           description: "O texto foi melhorado com sucesso pela IA!",
         });
+      } else {
+        // Se a API falhar, tente o mock como fallback
+        console.log("API falhou, usando fallback mock");
+        const mockResult = await mockImproveText(formData[field]);
+        
+        if (mockResult.success) {
+          console.log("Texto melhorado com mock:", mockResult.improvedText);
+          setImprovedTexts((prev) => ({ ...prev, [field]: mockResult.improvedText }));
+          
+          toast({
+            title: "Texto melhorado (modo offline)",
+            description: "O texto foi melhorado com nosso sistema local.",
+          });
+        }
       }
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao melhorar o texto. Tente novamente mais tarde.",
-        variant: "destructive",
-      });
       console.error("Erro ao melhorar texto:", error);
+      
+      // Tente o mock como última opção
+      try {
+        console.log("Erro na API real, tentando mock como último recurso");
+        const mockResult = await mockImproveText(formData[field]);
+        if (mockResult.success) {
+          setImprovedTexts((prev) => ({ ...prev, [field]: mockResult.improvedText }));
+          
+          toast({
+            title: "Texto melhorado (modo offline)",
+            description: "O texto foi melhorado com nosso sistema local.",
+          });
+        }
+      } catch (mockError) {
+        toast({
+          title: "Erro",
+          description: "Ocorreu um erro ao melhorar o texto. Tente novamente mais tarde.",
+          variant: "destructive",
+        });
+        console.error("Erro no fallback mock:", mockError);
+      }
     } finally {
       setIsImproving(null);
     }

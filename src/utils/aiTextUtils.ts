@@ -22,6 +22,8 @@ export const improveTextWithAI = async (text: string): Promise<ImprovedTextRespo
   }
 
   try {
+    console.log("Iniciando chamada para API Gemini");
+    
     const prompt = `
       Você é um assistente especializado em textos médicos em português. 
       Por favor, revise e melhore o seguinte texto médico, corrigindo erros gramaticais, 
@@ -44,6 +46,8 @@ export const improveTextWithAI = async (text: string): Promise<ImprovedTextRespo
       }),
     });
 
+    console.log("Status da resposta API:", response.status);
+    
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Erro na resposta da API Gemini:", errorData);
@@ -51,14 +55,17 @@ export const improveTextWithAI = async (text: string): Promise<ImprovedTextRespo
     }
 
     const data = await response.json();
+    console.log("Resposta completa da API:", data);
     
     // Extrair o texto melhorado da resposta da API Gemini
     const improvedText = data.candidates[0]?.content?.parts[0]?.text || "";
     
     if (!improvedText) {
+      console.error("Resposta da API sem texto:", data);
       throw new Error("Não foi possível extrair o texto melhorado da resposta da API");
     }
 
+    console.log("Texto melhorado extraído com sucesso:", improvedText);
     return { improvedText, success: true };
   } catch (error) {
     console.error("Erro ao melhorar texto com API Gemini:", error);
@@ -101,6 +108,7 @@ export const mockImproveText = (text: string): Promise<ImprovedTextResponse> => 
         improvedText += '.';
       }
 
+      console.log("Mock text improvement:", improvedText);
       resolve({ improvedText, success: true });
     }, 1000); // Simula o tempo de resposta da API
   });
