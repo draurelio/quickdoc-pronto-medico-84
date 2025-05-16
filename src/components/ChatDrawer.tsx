@@ -51,7 +51,10 @@ export default function ChatDrawer({ open, onOpenChange }: { open: boolean; onOp
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-w-md w-full right-0 fixed top-0 h-full flex flex-col z-50">
+      <DrawerContent 
+        className="fixed bottom-4 right-4 max-w-md w-full sm:w-[350px] h-[500px] flex flex-col z-50 rounded-xl shadow-2xl border bg-background p-0 animate-in fade-in"
+        style={{ left: 'unset', top: 'unset' }}
+      >
         <DrawerHeader className="flex flex-row items-center justify-between border-b p-4">
           <DrawerTitle>Chat com IA</DrawerTitle>
           <DrawerClose asChild>
@@ -60,7 +63,7 @@ export default function ChatDrawer({ open, onOpenChange }: { open: boolean; onOp
             </Button>
           </DrawerClose>
         </DrawerHeader>
-        <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-muted">
+        <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-muted" style={{ minHeight: 0 }}>
           {messages.length === 0 && (
             <div className="text-center text-muted-foreground">Inicie uma conversa com a IA!</div>
           )}
@@ -72,7 +75,7 @@ export default function ChatDrawer({ open, onOpenChange }: { open: boolean; onOp
             </div>
           ))}
         </div>
-        <div className="p-4 border-t flex gap-2 bg-background">
+        <div className="p-4 border-t flex gap-2 bg-background sticky bottom-0">
           <Input
             ref={inputRef}
             value={input}
