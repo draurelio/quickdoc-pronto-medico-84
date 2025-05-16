@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FilePlus, Wand2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import MedicalModelsModal from './medical/MedicalModelsModal';
+import { mockImproveText } from '@/utils/aiTextUtils';
 
 export interface MedicalFormData {
   admission: string;
@@ -31,6 +32,7 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
     plans: '',
   });
 
+  const [improvedTexts, setImprovedTexts] = useState<Partial<MedicalFormData>>({});
   const [isModelModalOpen, setIsModelModalOpen] = useState(false);
   const [currentField, setCurrentField] = useState<keyof MedicalFormData | null>(null);
   const [isImproving, setIsImproving] = useState<keyof MedicalFormData | null>(null);
@@ -64,46 +66,18 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
     setIsImproving(field);
     
     try {
-      // Simulação de melhoria de texto com IA
-      // Em uma implementação real, isso seria uma chamada a uma API de IA
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Utilizando a versão mock para demonstração
+      // Em produção, usar improveTextWithAI
+      const { improvedText, success } = await mockImproveText(formData[field]);
       
-      const originalText = formData[field];
-      let improvedText = originalText;
-      
-      // Simulação de melhorias simples no texto
-      improvedText = improvedText
-        .replace(/\s+/g, ' ')                          // Remove espaços duplos
-        .replace(/\s+([.,;:])/g, '$1')                 // Remove espaços antes de pontuação
-        .replace(/([.,;:])\s*([A-Z])/g, '$1 $2');      // Garante espaço após pontuação seguido por maiúscula
+      if (success) {
+        setImprovedTexts((prev) => ({ ...prev, [field]: improvedText }));
         
-      // Adiciona algumas melhorias cosméticas para simular a IA
-      if (field === 'admission') {
-        improvedText = improvedText
-          .replace(/paciente apresentou/i, 'O paciente apresentou')
-          .replace(/paciente veio/i, 'O paciente chegou ao serviço')
-          .replace(/dor/i, 'quadro álgico');
-      } else if (field === 'analysis') {
-        improvedText = improvedText
-          .replace(/normotensa/i, 'com níveis tensionais adequados')
-          .replace(/sem alteracoes/i, 'sem alterações significativas');
+        toast({
+          title: "Texto melhorado",
+          description: "O texto foi melhorado com sucesso!",
+        });
       }
-      
-      // Capitaliza a primeira letra se não estiver
-      improvedText = improvedText.charAt(0).toUpperCase() + improvedText.slice(1);
-      
-      // Termina com ponto se não houver
-      if (!improvedText.endsWith('.') && !improvedText.endsWith('!') && !improvedText.endsWith('?')) {
-        improvedText += '.';
-      }
-      
-      handleChange(field, improvedText);
-      
-      toast({
-        title: "Texto melhorado",
-        description: "O texto foi melhorado com sucesso!",
-      });
-
     } catch (error) {
       toast({
         title: "Erro",
@@ -132,18 +106,16 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
           {fieldLabels[field]}
         </Label>
         <div className="flex gap-2">
-          {field === 'admission' && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-8 text-xs bg-gradient-to-r from-purple-50 to-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
-              onClick={() => improveText(field)}
-              disabled={isImproving !== null}
-            >
-              <Wand2 className="h-3.5 w-3.5 mr-1" /> 
-              {isImproving === field ? 'Melhorando...' : 'Melhorar texto'}
-            </Button>
-          )}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 text-xs bg-gradient-to-r from-purple-50 to-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100"
+            onClick={() => improveText(field)}
+            disabled={isImproving !== null}
+          >
+            <Wand2 className="h-3.5 w-3.5 mr-1" /> 
+            {isImproving === field ? 'Melhorando...' : 'Melhorar texto'}
+          </Button>
           <Button 
             variant="outline" 
             size="sm" 
@@ -162,6 +134,16 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
         placeholder={`Insira ${fieldLabels[field].toLowerCase()} aqui...`}
         className="min-h-[120px] w-full"
       />
+      
+      {improvedTexts[field] && (
+        <div className="mt-3 p-3 border border-green-200 bg-green-50 rounded-md">
+          <div className="mb-1 flex items-center">
+            <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+            <span className="text-xs font-medium text-green-700">Texto melhorado</span>
+          </div>
+          <p className="text-sm text-gray-700">{improvedTexts[field]}</p>
+        </div>
+      )}
     </div>
   );
 
