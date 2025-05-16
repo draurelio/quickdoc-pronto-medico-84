@@ -36,9 +36,9 @@ function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: s
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       let mediaRecorder: MediaRecorder;
       try {
-        mediaRecorder = new window.MediaRecorder(stream, { mimeType: "audio/mp3" });
+        mediaRecorder = new window.MediaRecorder(stream, { mimeType: "audio/webm" });
       } catch (e) {
-        alert("Seu navegador não suporta gravação em mp3. Tente usar o Google Chrome ou Edge atualizado.");
+        alert("Seu navegador não suporta gravação em webm. Tente usar o Google Chrome ou Edge atualizado.");
         return;
       }
       mediaRecorderRef.current = mediaRecorder;
@@ -50,7 +50,7 @@ function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: s
 
       mediaRecorder.onstop = async () => {
         setLoading(true);
-        const audioBlob = new Blob(audioChunks.current, { type: "audio/mp3" });
+        const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
         try {
           // 1. Upload audio
           const uploadRes = await axios.post(
