@@ -1,25 +1,21 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = React.useState<boolean | null>(null);
+  const { isAuthenticated, loading } = useAuth();
 
-  React.useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
-    };
-    
-    checkAuth();
-  }, []);
-
-  if (isAuthenticated === null) {
-    return <div>Carregando...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-medblue-600"></div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {

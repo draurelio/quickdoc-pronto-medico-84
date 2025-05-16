@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Card,
   CardContent,
@@ -24,31 +24,24 @@ import { ChevronLeft, LogIn, UserRound } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate('/');
-      }
-    };
-    
-    checkAuth();
-  }, [navigate]);
+    // Redirecionar para página principal se já estiver autenticado
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { user, error } = await login(email, password);
 
       if (error) {
         throw error;
@@ -76,10 +69,7 @@ const Login = () => {
     
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+      const { user, error } = await signup(email, password);
 
       if (error) {
         throw error;
@@ -99,6 +89,15 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  // Mostrar tela de carregamento enquanto verifica autenticação
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-medblue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container flex items-center justify-center min-h-screen py-8 px-4">
