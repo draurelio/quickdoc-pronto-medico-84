@@ -160,75 +160,79 @@ export default function ChatDrawer({ open, onOpenChange }: { open: boolean; onOp
             </div>
           ))}
         </div>
-        <div className="p-4 border-t flex gap-2 bg-background sticky bottom-0">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImageSelect}
-            accept="image/*"
-            className="hidden"
-          />
-          <input
-            type="file"
-            ref={documentInputRef}
-            onChange={handleDocumentSelect}
-            accept=".pdf,.doc,.docx,.txt"
-            className="hidden"
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => fileInputRef.current?.click()}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <ImageIcon className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => documentInputRef.current?.click()}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <FileText className="w-4 h-4" />
-          </Button>
-          {selectedImage && (
-            <div className="relative">
-              <img src={selectedImage} alt="Preview" className="h-8 w-8 object-cover rounded" />
-              <button
-                onClick={() => setSelectedImage(null)}
-                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-              >
-                ×
-              </button>
-            </div>
-          )}
-          {selectedDocument && (
-            <div className="relative">
-              <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded">
-                <FileText className="w-3 h-3" />
-                <span className="text-xs truncate max-w-[100px]">{selectedDocument.name}</span>
+        <div className="p-4 border-t bg-background sticky bottom-0 flex flex-col gap-2">
+          <div className="flex gap-2 mb-1">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageSelect}
+              accept="image/*"
+              className="hidden"
+            />
+            <input
+              type="file"
+              ref={documentInputRef}
+              onChange={handleDocumentSelect}
+              accept=".pdf,.doc,.docx,.txt"
+              className="hidden"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <ImageIcon className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => documentInputRef.current?.click()}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <FileText className="w-4 h-4" />
+            </Button>
+            {selectedImage && (
+              <div className="relative">
+                <img src={selectedImage} alt="Preview" className="h-8 w-8 object-cover rounded" />
                 <button
-                  onClick={() => setSelectedDocument(null)}
-                  className="ml-1 text-red-500 hover:text-red-700"
+                  onClick={() => setSelectedImage(null)}
+                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
                 >
                   ×
                 </button>
               </div>
-            </div>
-          )}
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Digite sua mensagem..."
-            disabled={loading}
-            className="flex-1 text-xs"
-            autoFocus
-          />
-          <Button onClick={sendMessage} disabled={loading || (!input.trim() && !selectedImage && !selectedDocument)} size="sm">
-            <Send className="w-3 h-3" />
-          </Button>
+            )}
+            {selectedDocument && (
+              <div className="relative">
+                <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded">
+                  <FileText className="w-3 h-3" />
+                  <span className="text-xs truncate max-w-[100px]">{selectedDocument.name}</span>
+                  <button
+                    onClick={() => setSelectedDocument(null)}
+                    className="ml-1 text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              ref={inputRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Digite sua mensagem..."
+              disabled={loading}
+              className="flex-1 text-xs"
+              autoFocus
+            />
+            <Button onClick={sendMessage} disabled={loading || (!input.trim() && !selectedImage && !selectedDocument)} size="sm">
+              <Send className="w-3 h-3" />
+            </Button>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>
