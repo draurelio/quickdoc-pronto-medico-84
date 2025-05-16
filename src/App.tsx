@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,7 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PrescriptionHistory from "./pages/PrescriptionHistory";
 import Login from "./pages/Login";
-import ProtectedRoute from "./components/ProtectedRoute";
+// import ProtectedRoute from "./components/ProtectedRoute";
 
 // Criar o QueryClient fora do componente para evitar recriação em cada renderização
 const queryClient = new QueryClient({
@@ -31,24 +30,10 @@ const App: React.FC = () => {
           <HashRouter>
             <Routes>
               <Route path="/login" element={<Login />} />
-              <Route 
-                path="/" 
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/historico" 
-                element={
-                  <ProtectedRoute>
-                    <PrescriptionHistory />
-                  </ProtectedRoute>
-                } 
-              />
-              {/* Redirecionar o usuário para login se tentar acessar qualquer outra rota */}
-              <Route path="*" element={<Navigate to="/login" replace />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/historico" element={<PrescriptionHistory />} />
+              {/* Redirecionar o usuário para NotFound se tentar acessar qualquer outra rota */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </HashRouter>
         </TooltipProvider>
