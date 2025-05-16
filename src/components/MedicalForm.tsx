@@ -27,87 +27,35 @@ const BASE_URL = "https://api.assemblyai.com/v2";
 
 function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: string) => void }) {
   const [recording, setRecording] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
-  const audioChunks = React.useRef<Blob[]>([]);
+  const recognitionRef = React.useRef<any>(null);
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      let mediaRecorder: MediaRecorder;
-      try {
-        mediaRecorder = new window.MediaRecorder(stream, { mimeType: "audio/webm" });
-      } catch (e) {
-        alert("Seu navegador não suporta gravação em webm. Tente usar o Google Chrome ou Edge atualizado.");
-        return;
-      }
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunks.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunks.current.push(event.data);
-      };
-
-      mediaRecorder.onstop = async () => {
-        setLoading(true);
-        const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
-        try {
-          // 1. Upload audio
-          const uploadRes = await axios.post(
-            `${BASE_URL}/upload`,
-            audioBlob,
-            {
-              headers: {
-                authorization: ASSEMBLYAI_API_KEY,
-                "content-type": "application/octet-stream",
-              },
-            }
-          );
-          const audioUrl = uploadRes.data.upload_url;
-          // 2. Request transcription
-          const transcriptRes = await axios.post(
-            `${BASE_URL}/transcript`,
-            { audio_url: audioUrl },
-            { headers: { authorization: ASSEMBLYAI_API_KEY } }
-          );
-          const transcriptId = transcriptRes.data.id;
-          // 3. Polling
-          let completed = false;
-          while (!completed) {
-            await new Promise((res) => setTimeout(res, 3000));
-            const pollRes = await axios.get(
-              `${BASE_URL}/transcript/${transcriptId}`,
-              { headers: { authorization: ASSEMBLYAI_API_KEY } }
-            );
-            if (pollRes.data.status === "completed") {
-              onChange((value ? value + " " : "") + pollRes.data.text);
-              completed = true;
-            } else if (pollRes.data.status === "error") {
-              alert("Erro na transcrição: " + pollRes.data.error);
-              console.error("Erro detalhado:", pollRes.data);
-              completed = true;
-            }
-          }
-        } catch (err: any) {
-          if (err.response) {
-            alert("Erro ao transcrever áudio: " + JSON.stringify(err.response.data));
-            console.error("Erro detalhado:", err.response.data);
-          } else {
-            alert("Erro ao transcrever áudio: " + (err?.message || JSON.stringify(err)));
-            console.error("Erro detalhado:", err);
-          }
-        }
-        setLoading(false);
-      };
-      mediaRecorder.start();
-      setRecording(true);
-    } catch (err) {
-      alert("Microfone não encontrado ou permissão negada. Verifique as configurações do navegador e tente novamente.");
+  const startRecognition = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Seu navegador não suporta reconhecimento de voz. Tente usar o Google Chrome ou Edge atualizado.");
+      return;
     }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      onChange((value ? value + ' ' : '') + transcript);
+    };
+    recognition.onerror = (event: any) => {
+      alert('Erro no reconhecimento de voz: ' + event.error);
+    };
+    recognition.onend = () => {
+      setRecording(false);
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
+    setRecording(true);
   };
 
-  const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
+  const stopRecognition = () => {
+    recognitionRef.current?.stop();
     setRecording(false);
   };
 
@@ -117,8 +65,7 @@ function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: s
       variant="outline"
       size="icon"
       className={recording ? "bg-red-100 border-red-300 text-red-700" : "bg-blue-50 border-blue-200 text-blue-600"}
-      onClick={recording ? stopRecording : startRecording}
-      disabled={loading}
+      onClick={recording ? stopRecognition : startRecognition}
       title={recording ? "Parar gravação" : "Gravar áudio"}
       style={{ marginLeft: 8 }}
     >
