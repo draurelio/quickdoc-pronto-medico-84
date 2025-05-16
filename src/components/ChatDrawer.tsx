@@ -32,6 +32,16 @@ export default function ChatDrawer({ open, onOpenChange }: { open: boolean; onOp
     }
   };
 
+  const formatConversationHistory = (messages: Message[]): string => {
+    return messages.map(msg => {
+      if (msg.role === "user") {
+        return `Usuário: ${msg.text}${msg.image ? " [Enviou uma imagem]" : ""}`;
+      } else {
+        return `IA: ${msg.text}`;
+      }
+    }).join("\n");
+  };
+
   const sendMessage = async () => {
     if (!input.trim() && !selectedImage) return;
     
@@ -47,13 +57,18 @@ export default function ChatDrawer({ open, onOpenChange }: { open: boolean; onOp
     setLoading(true);
 
     try {
+      const conversationHistory = formatConversationHistory(messages);
+      const prompt = conversationHistory 
+        ? `${conversationHistory}\n\nUsuário: ${userMessage.text}${userMessage.image ? " [Enviou uma imagem]" : ""}\n\nIA:`
+        : `Usuário: ${userMessage.text}${userMessage.image ? " [Enviou uma imagem]" : ""}\n\nIA:`;
+
       const response = await fetch(GEMINI_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ 
             parts: [
-              { text: userMessage.text },
+              { text: prompt },
               ...(userMessage.image ? [{ inlineData: { mimeType: "image/jpeg", data: userMessage.image.split(',')[1] } }] : [])
             ] 
           }],
