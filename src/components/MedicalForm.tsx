@@ -34,7 +34,13 @@ function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: s
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new window.MediaRecorder(stream);
+      let mediaRecorder: MediaRecorder;
+      try {
+        mediaRecorder = new window.MediaRecorder(stream, { mimeType: "audio/mp3" });
+      } catch (e) {
+        alert("Seu navegador não suporta gravação em mp3. Tente usar o Google Chrome ou Edge atualizado.");
+        return;
+      }
       mediaRecorderRef.current = mediaRecorder;
       audioChunks.current = [];
 
@@ -44,7 +50,7 @@ function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: s
 
       mediaRecorder.onstop = async () => {
         setLoading(true);
-        const audioBlob = new Blob(audioChunks.current, { type: "audio/webm" });
+        const audioBlob = new Blob(audioChunks.current, { type: "audio/mp3" });
         try {
           // 1. Upload audio
           const uploadRes = await axios.post(
@@ -82,9 +88,14 @@ function AudioToTextButton({ value, onChange }: { value: string, onChange: (v: s
               completed = true;
             }
           }
-        } catch (err) {
-          alert("Erro ao transcrever áudio: " + (err?.message || JSON.stringify(err)));
-          console.error("Erro detalhado:", err);
+        } catch (err: any) {
+          if (err.response) {
+            alert("Erro ao transcrever áudio: " + JSON.stringify(err.response.data));
+            console.error("Erro detalhado:", err.response.data);
+          } else {
+            alert("Erro ao transcrever áudio: " + (err?.message || JSON.stringify(err)));
+            console.error("Erro detalhado:", err);
+          }
         }
         setLoading(false);
       };
