@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PatientHeader, { PatientData } from '@/components/PatientHeader';
@@ -7,6 +8,7 @@ import DocumentGenerator from '@/components/DocumentGenerator';
 import { Toaster } from "@/components/ui/toaster";
 import { Card, CardContent } from "@/components/ui/card";
 import HoverSidebar from '@/components/HoverSidebar';
+
 const Index = () => {
   const [patientData, setPatientData] = useState<PatientData>({
     name: '',
@@ -17,6 +19,7 @@ const Index = () => {
     allergies: '',
     origin: ''
   });
+  
   const [prescriptionData, setPrescriptionData] = useState<PrescriptionItem[]>([{
     id: '1',
     medication: '',
@@ -26,6 +29,7 @@ const Index = () => {
     notes: '',
     time: ''
   }]);
+  
   const [medicalData, setMedicalData] = useState<MedicalFormData>({
     admission: '',
     comorbidities: '',
@@ -34,7 +38,9 @@ const Index = () => {
     analysis: '',
     plans: ''
   });
-  return <div className="min-h-screen bg-gray-50">
+  
+  return (
+    <div className="min-h-screen bg-gray-50">
       <header className="bg-gradient-to-r from-medblue-700 via-medblue-600 to-medblue-500 text-white py-4 px-6 shadow-lg sticky top-0 z-10">
         <div className="container flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -43,8 +49,7 @@ const Index = () => {
             </div>
             <div>
               <h1 className="drop-shadow-sm text-center text-gray-50 font-extrabold text-5xl">QuickDOC</h1>
-              <p className="text-white/90 font-medium text-sm text-center">Prontuários Médicos Digitais Inteligentes
-versão 1.3</p>
+              <p className="text-white/90 font-medium text-sm text-center">Prontuários Médicos Digitais</p>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm py-2 px-4 rounded-full shadow-inner">
@@ -113,6 +118,8 @@ versão 1.3</p>
       <HoverSidebar />
       
       <Toaster />
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
