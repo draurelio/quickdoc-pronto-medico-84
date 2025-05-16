@@ -1,4 +1,3 @@
-
 import { DocumentData } from "./documentHtmlGenerator";
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
@@ -29,12 +28,12 @@ export const generateDocxFromTemplate = async (data: DocumentData) => {
       diagnostico: data.patient.diagnosis || '',
       alergias: data.patient.allergies || '',
       origem: data.patient.origin || '',
-      admissao: data.medical.admission || '',
-      comorbidades: data.medical.comorbidities || '',
-      muc: data.medical.medicationReason || '',
-      examefisico: data.medical.physicalExam || '',
-      analise: data.medical.analysis || '',
-      condutas: data.medical.plans || '',
+      admissao: (data.medical.admission || '').toUpperCase(),
+      comorbidades: (data.medical.comorbidities || '').toUpperCase(),
+      muc: (data.medical.medicationReason || '').toUpperCase(),
+      examefisico: (data.medical.physicalExam || '').toUpperCase(),
+      analise: (data.medical.analysis || '').toUpperCase(),
+      condutas: (data.medical.plans || '').toUpperCase(),
     };
 
     // Adicionar dados das medicações
