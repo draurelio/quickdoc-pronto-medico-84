@@ -126,25 +126,9 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
           });
         }
       } else {
-        // Fallback para localStorage
-        const newModel = {
-          id: crypto.randomUUID(),
-          name: modelName.trim(),
-          field: currentField,
-          content: fieldValue
-        };
-        
-        // Buscar todos os modelos existentes
-        const saved = localStorage.getItem('medical_models');
-        let allModels = saved ? JSON.parse(saved) : [];
-        allModels = [newModel, ...allModels];
-        
-        localStorage.setItem('medical_models', JSON.stringify(allModels));
-        setModels([newModel, ...models]);
-        
         toast({
-          title: 'Modelo salvo localmente',
-          description: 'Faça login para salvar os modelos na nuvem e acessar de qualquer computador.',
+          title: 'Faça login',
+          description: 'É necessário estar logado para salvar modelos na nuvem.',
           variant: 'destructive',
         });
       }
@@ -193,20 +177,11 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
           description: 'O modelo foi atualizado com sucesso.',
         });
       } else {
-        // Fallback para localStorage
-        const saved = localStorage.getItem('medical_models');
-        if (saved) {
-          let allModels = JSON.parse(saved);
-          allModels = allModels.map((model: MedicalModel) =>
-            model.id === id ? { ...model, name: editName.trim() } : model
-          );
-          
-          localStorage.setItem('medical_models', JSON.stringify(allModels));
-          
-          setModels(models.map(model =>
-            model.id === id ? { ...model, name: editName.trim() } : model
-          ));
-        }
+        toast({
+          title: 'Faça login',
+          description: 'É necessário estar logado para editar modelos na nuvem.',
+          variant: 'destructive',
+        });
       }
       
       setEditingModelId(null);
@@ -238,6 +213,12 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
           .eq('id', id);
           
         if (error) throw error;
+      } else {
+        toast({
+          title: 'Faça login',
+          description: 'É necessário estar logado para excluir modelos na nuvem.',
+          variant: 'destructive',
+        });
       }
       
       // Atualizar estado local
@@ -301,7 +282,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
             className="w-full p-2 border rounded"
             value={modelName}
             onChange={e => setModelName(e.target.value)}
-            disabled={loading}
+            disabled={loading || !isLoggedIn}
           />
           <Button 
             onClick={handleSaveModel} 
@@ -319,7 +300,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
         
         {!isLoggedIn && (
           <div className="mb-2 text-sm text-red-600 font-semibold text-center">
-            Faça login para salvar modelos na nuvem e acessar de qualquer computador.
+            Faça login para salvar, editar ou excluir modelos na nuvem.
           </div>
         )}
         

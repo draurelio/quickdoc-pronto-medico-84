@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Trash2, Save, FilePlus, Edit, Check } from 'lucide-react';
@@ -26,6 +25,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
   const [editingModelId, setEditingModelId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const { toast } = useToast();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Carregar modelos do Supabase
   const fetchModels = async () => {
@@ -34,6 +34,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
       const { data: session } = await supabase.auth.getSession();
       
       if (session?.session?.user) {
+        setIsLoggedIn(true);
         const { data, error } = await supabase
           .from('prescription_models')
           .select('*')
@@ -108,20 +109,10 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
           });
         }
       } else {
-        // Fallback para localStorage
-        const newModel = {
-          id: crypto.randomUUID(),
-          name: modelName.trim(),
-          prescriptions: modelPrescriptions
-        };
-        
-        const updatedModels = [newModel, ...models];
-        setModels(updatedModels);
-        localStorage.setItem('prescription_models', JSON.stringify(updatedModels));
-        
         toast({
-          title: 'Modelo salvo localmente',
-          description: 'Faça login para salvar os modelos na nuvem.',
+          title: 'Faça login',
+          description: 'É necessário estar logado para salvar modelos na nuvem.',
+          variant: 'destructive',
         });
       }
       
@@ -169,13 +160,11 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
           description: 'O modelo foi atualizado com sucesso.',
         });
       } else {
-        // Fallback para localStorage
-        const updatedModels = models.map(model =>
-          model.id === id ? { ...model, name: editName.trim() } : model
-        );
-        
-        setModels(updatedModels);
-        localStorage.setItem('prescription_models', JSON.stringify(updatedModels));
+        toast({
+          title: 'Faça login',
+          description: 'É necessário estar logado para editar modelos na nuvem.',
+          variant: 'destructive',
+        });
       }
       
       setEditingModelId(null);
@@ -207,6 +196,12 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
           .eq('id', id);
           
         if (error) throw error;
+      } else {
+        toast({
+          title: 'Faça login',
+          description: 'É necessário estar logado para excluir modelos na nuvem.',
+          variant: 'destructive',
+        });
       }
       
       // Atualizar estado local
@@ -265,13 +260,13 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
             className="w-full p-2 border rounded"
             value={modelName}
             onChange={e => setModelName(e.target.value)}
-            disabled={loading}
+            disabled={loading || !isLoggedIn}
           />
           <Button 
             onClick={handleSaveModel} 
             className="bg-blue-600 hover:bg-blue-700 text-white" 
-            title="Salvar modelo"
-            disabled={loading || !modelName.trim()}
+            title={isLoggedIn ? 'Salvar modelo' : 'Faça login para salvar na nuvem'}
+            disabled={loading || !modelName.trim() || !isLoggedIn}
           >
             {loading ? (
               <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
@@ -280,6 +275,11 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
             )}
           </Button>
         </div>
+        {!isLoggedIn && (
+          <div className="mb-2 text-sm text-red-600 font-semibold text-center">
+            Faça login para salvar, editar ou excluir modelos na nuvem.
+          </div>
+        )}
         
         {loading && !models.length && (
           <div className="flex justify-center py-4">
