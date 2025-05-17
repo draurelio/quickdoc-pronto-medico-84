@@ -72,16 +72,16 @@ const SignupForm: React.FC<SignupFormProps> = ({ email, setEmail, onSignupSucces
         duration: 5000,
       });
       
-      // Limpar os campos de senha após o cadastro bem-sucedido
+      // Clear password fields after successful signup
       setPassword('');
       setConfirmPassword('');
       
-      // Mudar para a aba de login após o cadastro
+      // Change to login tab after signup
       onSignupSuccess();
     } catch (error: any) {
       const errorMsg = error.message || "Ocorreu um erro ao criar sua conta.";
       
-      // Mensagens de erro mais amigáveis
+      // More user-friendly error messages
       let userFriendlyMessage = errorMsg;
       if (errorMsg.includes("User already registered")) {
         userFriendlyMessage = "Este email já está cadastrado. Tente fazer login.";

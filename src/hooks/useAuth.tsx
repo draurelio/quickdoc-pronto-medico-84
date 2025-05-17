@@ -15,36 +15,35 @@ export function useAuth() {
   const isAdmin = user?.email === ADMIN_EMAIL;
 
   useEffect(() => {
-    // Verifica sessão atual
-    const getUser = async () => {
+    // Verify current session
+    const checkSession = async () => {
       setLoading(true);
       try {
-        console.log('useAuth - Verificando sessão...');
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('useAuth - Erro ao obter sessão:', error);
+          console.error('Authentication error:', error);
         } else {
-          console.log('useAuth - Sessão obtida:', data.session ? 'Existe sessão' : 'Sem sessão');
           setUser(data.session?.user || null);
         }
       } catch (error) {
-        console.error('useAuth - Erro ao obter usuário:', error);
+        console.error('Failed to get user session:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    getUser();
+    checkSession();
 
-    // Configura listener para mudanças de autenticação
+    // Setup authentication state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('useAuth - Mudança de estado de autenticação:', event);
+        console.log('Auth state change:', event);
         
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           setUser(session?.user || null);
-          // Ensures profile is created if this is first login
+          
+          // Create profile if this is first login
           if (session?.user) {
             const { data: profile } = await supabase
               .from('profiles')
@@ -61,13 +60,13 @@ export function useAuth() {
                 .insert([
                   { 
                     id: session.user.id, 
-                    name: session.user.email?.split('@')[0] || 'Usuário',
+                    name: session.user.email?.split('@')[0] || 'User',
                     is_admin: isAdminUser
                   }
                 ]);
               
               if (profileError) {
-                console.error('useAuth - Erro ao criar perfil automático:', profileError);
+                console.error('Error creating automatic profile:', profileError);
               }
             }
           }
@@ -79,7 +78,7 @@ export function useAuth() {
       }
     );
 
-    // Limpa o listener quando o componente for desmontado
+    // Clean up listener when component unmounts
     return () => {
       authListener.subscription.unsubscribe();
     };
@@ -87,7 +86,6 @@ export function useAuth() {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('useAuth - Tentando login:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -95,19 +93,15 @@ export function useAuth() {
 
       if (error) throw error;
       
-      console.log('useAuth - Login bem-sucedido:', data.user?.email);
       return { user: data.user, error: null };
     } catch (error: any) {
-      console.error('useAuth - Erro no login:', error.message);
+      console.error('Login error:', error.message);
       return { user: null, error };
     }
   };
 
   const signup = async (email: string, password: string) => {
     try {
-      console.log('useAuth - Tentando cadastro:', email);
-      
-      // Using signUp with email confirmation disabled for better cross-device support
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -121,8 +115,6 @@ export function useAuth() {
 
       if (error) throw error;
       
-      console.log('useAuth - Cadastro bem-sucedido:', data);
-      
       // Create a profile record for the new user
       if (data.user) {
         // Check if user being created is the admin
@@ -133,32 +125,30 @@ export function useAuth() {
           .insert([
             { 
               id: data.user.id, 
-              name: email.split('@')[0] || 'Usuário',
+              name: email.split('@')[0] || 'User',
               is_admin: isAdminUser 
             }
           ]);
         
         if (profileError) {
-          console.error('useAuth - Erro ao criar perfil:', profileError);
+          console.error('Error creating profile:', profileError);
         }
       }
       
       return { user: data.user, error: null };
     } catch (error: any) {
-      console.error('useAuth - Erro no cadastro:', error.message);
+      console.error('Signup error:', error.message);
       return { user: null, error };
     }
   };
 
   const logout = async () => {
     try {
-      console.log('useAuth - Realizando logout');
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      console.log('useAuth - Logout bem-sucedido');
       return { error: null };
     } catch (error: any) {
-      console.error('useAuth - Erro no logout:', error.message);
+      console.error('Logout error:', error.message);
       return { error };
     }
   };

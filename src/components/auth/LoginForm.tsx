@@ -46,9 +46,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail }) => {
       }
 
       if (user) {
-        // Sincronizar modelos locais com Supabase após login
+        // Synchronize local models with Supabase after login
         await syncLocalModelsToSupabase(user.id);
-
+        
         // Check if admin login
         const isAdmin = email === 'med.hospitaldraurelio@gmail.com';
         
