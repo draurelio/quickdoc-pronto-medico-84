@@ -2,34 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/use-toast';
-import { ChevronLeft, LogIn, UserRound } from 'lucide-react';
-import { syncLocalModelsToSupabase } from '@/utils/syncLocalModelsToSupabase';
+import LoginForm from '@/components/auth/LoginForm';
+import SignupForm from '@/components/auth/SignupForm';
+import LoginPageLayout from '@/components/auth/LoginPageLayout';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [activeTab, setActiveTab] = useState('login');
 
   useEffect(() => {
@@ -39,268 +19,29 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+  const handleSignupSuccess = () => {
+    setActiveTab('login');
   };
-
-  const validatePassword = (password: string) => {
-    return password.length >= 6;
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateEmail(email)) {
-      toast({
-        title: "Email inválido",
-        description: "Por favor, insira um email válido.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      const { user, error } = await login(email, password);
-
-      if (error) {
-        throw error;
-      }
-
-      if (user) {
-        // Sincronizar modelos locais com Supabase após login
-        await syncLocalModelsToSupabase(user.id);
-
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Você será redirecionado para a página inicial.",
-        });
-        
-        navigate('/index');
-      } else {
-        throw new Error("Falha no login. Por favor, tente novamente.");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Erro ao fazer login",
-        description: error.message === "Invalid login credentials"
-          ? "Email ou senha incorretos."
-          : error.message || "Verifique suas credenciais e tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateEmail(email)) {
-      toast({
-        title: "Email inválido",
-        description: "Por favor, insira um email válido.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!validatePassword(password)) {
-      toast({
-        title: "Senha fraca",
-        description: "A senha deve ter pelo menos 6 caracteres.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      toast({
-        title: "Senhas não conferem",
-        description: "As senhas digitadas não são iguais.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      const { user, error } = await signup(email, password);
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Cadastro realizado com sucesso",
-        description: "Sua conta foi criada. Agora você pode fazer login.",
-      });
-      
-      // Mudar para a aba de login após o cadastro
-      setActiveTab('login');
-    } catch (error: any) {
-      const errorMsg = error.message || "Ocorreu um erro ao criar sua conta.";
-      
-      // Mensagens de erro mais amigáveis
-      let userFriendlyMessage = errorMsg;
-      if (errorMsg.includes("User already registered")) {
-        userFriendlyMessage = "Este email já está cadastrado. Tente fazer login.";
-      }
-      
-      toast({
-        title: "Erro ao criar conta",
-        description: userFriendlyMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Mostrar tela de carregamento enquanto verifica autenticação
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-medblue-600"></div>
-      </div>
-    );
-  }
 
   return (
-    <div className="container flex items-center justify-center min-h-screen py-8 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="bg-gradient-to-r from-medblue-100 to-medblue-50">
-          <div className="flex flex-col items-center space-y-2">
-            <UserRound className="h-12 w-12 text-medblue-600" />
-            <CardTitle className="text-xl text-medblue-800 text-center">
-              Acesso ao Sistema
-            </CardTitle>
-            <CardDescription className="text-center">
-              Faça login ou crie uma nova conta para acessar o sistema
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 my-4 mx-6">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Cadastro</TabsTrigger>
-          </TabsList>
-          <TabsContent value="login" className="space-y-4">
-            <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu.email@exemplo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <span className="flex items-center">
-                      <span className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
-                      Entrando...
-                    </span>
-                  ) : (
-                    <>
-                      <LogIn className="mr-2 h-4 w-4" />
-                      Entrar
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </TabsContent>
-          <TabsContent value="signup" className="space-y-4">
-            <CardContent>
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="seu.email@exemplo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Senha</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                  <p className="text-xs text-gray-500">A senha deve ter pelo menos 6 caracteres</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirmar Senha</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <span className="flex items-center">
-                      <span className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
-                      Cadastrando...
-                    </span>
-                  ) : (
-                    <>
-                      <UserRound className="mr-2 h-4 w-4" />
-                      Criar Conta
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </TabsContent>
-        </Tabs>
-        <CardFooter className="flex justify-center pt-0 pb-6">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/')}
-            className="flex items-center"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" /> Voltar para o início
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+    <LoginPageLayout
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      loading={authLoading}
+      loginForm={
+        <LoginForm 
+          email={email} 
+          setEmail={setEmail} 
+        />
+      }
+      signupForm={
+        <SignupForm 
+          email={email} 
+          setEmail={setEmail} 
+          onSignupSuccess={handleSignupSuccess} 
+        />
+      }
+    />
   );
 };
 
