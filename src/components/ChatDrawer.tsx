@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Image as ImageIcon, FileText } from "lucide-react";
+import { Send, Image as ImageIcon, FileText, Mic } from "lucide-react";
 
 const GEMINI_API_KEY = "AIzaSyAo8qRthzx1-qAdkisrBpiG7ZnvtXeTOCo";
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
@@ -16,6 +16,55 @@ interface Message {
     type: string;
     content: string;
   };
+}
+
+function AudioToTextButtonChat({ value, onChange }: { value: string, onChange: (v: string) => void }) {
+  const [recording, setRecording] = React.useState(false);
+  const recognitionRef = React.useRef<any>(null);
+
+  const startRecognition = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Seu navegador não suporta reconhecimento de voz. Tente usar o Google Chrome ou Edge atualizado.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      onChange((value ? value + ' ' : '') + transcript);
+    };
+    recognition.onerror = (event: any) => {
+      alert('Erro no reconhecimento de voz: ' + event.error);
+    };
+    recognition.onend = () => {
+      setRecording(false);
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
+    setRecording(true);
+  };
+
+  const stopRecognition = () => {
+    recognitionRef.current?.stop();
+    setRecording(false);
+  };
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="icon"
+      className={recording ? "bg-red-100 border-red-300 text-red-700" : "bg-blue-50 border-blue-200 text-blue-600"}
+      onClick={recording ? stopRecognition : startRecognition}
+      title={recording ? "Parar gravação" : "Gravar áudio"}
+    >
+      <Mic className="h-4 w-4" />
+      <span className="sr-only">Microfone</span>
+    </Button>
+  );
 }
 
 export default function ChatDrawer({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
@@ -219,6 +268,7 @@ export default function ChatDrawer({ open, onOpenChange }: { open: boolean; onOp
             )}
           </div>
           <div className="flex gap-2">
+            <AudioToTextButtonChat value={input} onChange={setInput} />
             <Input
               ref={inputRef}
               value={input}
