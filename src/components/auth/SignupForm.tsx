@@ -69,7 +69,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ email, setEmail, onSignupSucces
       toast({
         title: "Cadastro realizado com sucesso",
         description: "Sua conta foi criada. Agora você pode fazer login.",
+        duration: 5000,
       });
+      
+      // Limpar os campos de senha após o cadastro bem-sucedido
+      setPassword('');
+      setConfirmPassword('');
       
       // Mudar para a aba de login após o cadastro
       onSignupSuccess();
@@ -80,6 +85,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ email, setEmail, onSignupSucces
       let userFriendlyMessage = errorMsg;
       if (errorMsg.includes("User already registered")) {
         userFriendlyMessage = "Este email já está cadastrado. Tente fazer login.";
+      } else if (errorMsg.includes("network")) {
+        userFriendlyMessage = "Erro de conexão. Verifique sua internet.";
       }
       
       toast({
@@ -87,6 +94,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ email, setEmail, onSignupSucces
         description: userFriendlyMessage,
         variant: "destructive",
       });
+      console.error("Detalhes do erro de cadastro:", error);
     } finally {
       setLoading(false);
     }
@@ -103,6 +111,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ email, setEmail, onSignupSucces
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          autoComplete="email"
         />
       </div>
       <div className="space-y-2">
@@ -115,6 +124,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ email, setEmail, onSignupSucces
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
+          autoComplete="new-password"
         />
         <p className="text-xs text-gray-500">A senha deve ter pelo menos 6 caracteres</p>
       </div>
@@ -127,6 +137,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ email, setEmail, onSignupSucces
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
+          autoComplete="new-password"
         />
       </div>
       <Button

@@ -33,9 +33,35 @@ export function useAuth() {
 
     // Configura listener para mudanças de autenticação
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('useAuth - Mudança de estado de autenticação:', event);
-        setUser(session?.user || null);
+        
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setUser(session?.user || null);
+          // Ensures profile is created if this is first login
+          if (session?.user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (!profile) {
+              const { error: profileError } = await supabase
+                .from('profiles')
+                .insert([
+                  { id: session.user.id, name: session.user.email?.split('@')[0] || 'Usuário' }
+                ]);
+              
+              if (profileError) {
+                console.error('useAuth - Erro ao criar perfil automático:', profileError);
+              }
+            }
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+        }
+        
         setLoading(false);
       }
     );
@@ -68,7 +94,7 @@ export function useAuth() {
     try {
       console.log('useAuth - Tentando cadastro:', email);
       
-      // Using signUp with email confirmation disabled
+      // Using signUp with email confirmation disabled for better cross-device support
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -89,7 +115,7 @@ export function useAuth() {
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([
-            { id: data.user.id, name: email.split('@')[0] }
+            { id: data.user.id, name: email.split('@')[0] || 'Usuário' }
           ]);
         
         if (profileError) {

@@ -59,13 +59,20 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail }) => {
         throw new Error("Falha no login. Por favor, tente novamente.");
       }
     } catch (error: any) {
+      let errorMessage = "Verifique suas credenciais e tente novamente.";
+      
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "Email ou senha incorretos.";
+      } else if (error.message?.includes("network")) {
+        errorMessage = "Erro de conexão. Verifique sua internet.";
+      }
+      
       toast({
         title: "Erro ao fazer login",
-        description: error.message === "Invalid login credentials"
-          ? "Email ou senha incorretos."
-          : error.message || "Verifique suas credenciais e tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
+      console.error("Detalhes do erro de login:", error);
     } finally {
       setLoading(false);
     }
@@ -82,6 +89,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          autoComplete="email"
         />
       </div>
       <div className="space-y-2">
@@ -93,6 +101,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          autoComplete="current-password"
         />
       </div>
       <Button

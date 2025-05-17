@@ -21,6 +21,7 @@ const Login = () => {
 
   const handleSignupSuccess = () => {
     setActiveTab('login');
+    // Mostrar mensagem para verificar email se necessário
   };
 
   return (
