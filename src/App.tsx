@@ -8,7 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PrescriptionHistory from "./pages/PrescriptionHistory";
 import Login from "./pages/Login";
-// import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Criar o QueryClient fora do componente para evitar recriação em cada renderização
 const queryClient = new QueryClient({
@@ -29,10 +29,24 @@ const App: React.FC = () => {
           <Sonner />
           <HashRouter>
             <Routes>
+              <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/" element={<Index />} />
-              <Route path="/historico" element={<PrescriptionHistory />} />
-              {/* Redirecionar o usuário para NotFound se tentar acessar qualquer outra rota */}
+              <Route
+                path="/historico"
+                element={
+                  <ProtectedRoute>
+                    <PrescriptionHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/index"
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </HashRouter>
