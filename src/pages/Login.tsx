@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { ChevronLeft, LogIn, UserRound } from 'lucide-react';
+import { syncLocalModelsToSupabase } from '@/utils/syncLocalModelsToSupabase';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -46,6 +46,9 @@ const Login = () => {
       if (error) {
         throw error;
       }
+
+      // Sincronizar modelos locais com Supabase após login
+      await syncLocalModelsToSupabase(user?.id);
 
       toast({
         title: "Login realizado com sucesso",
