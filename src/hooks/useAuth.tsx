@@ -4,9 +4,15 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 
+// Admin user email for special privileges
+const ADMIN_EMAIL = 'med.hospitaldraurelio@gmail.com';
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Check if current user is admin
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   useEffect(() => {
     // Verifica sessão atual
@@ -47,10 +53,17 @@ export function useAuth() {
               .single();
               
             if (!profile) {
+              // Set admin flag if the user is the admin
+              const isAdminUser = session.user.email === ADMIN_EMAIL;
+              
               const { error: profileError } = await supabase
                 .from('profiles')
                 .insert([
-                  { id: session.user.id, name: session.user.email?.split('@')[0] || 'Usuário' }
+                  { 
+                    id: session.user.id, 
+                    name: session.user.email?.split('@')[0] || 'Usuário',
+                    is_admin: isAdminUser
+                  }
                 ]);
               
               if (profileError) {
@@ -112,10 +125,17 @@ export function useAuth() {
       
       // Create a profile record for the new user
       if (data.user) {
+        // Check if user being created is the admin
+        const isAdminUser = data.user.email === ADMIN_EMAIL;
+        
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([
-            { id: data.user.id, name: email.split('@')[0] || 'Usuário' }
+            { 
+              id: data.user.id, 
+              name: email.split('@')[0] || 'Usuário',
+              is_admin: isAdminUser 
+            }
           ]);
         
         if (profileError) {
@@ -150,5 +170,6 @@ export function useAuth() {
     signup,
     logout,
     isAuthenticated: !!user,
+    isAdmin,
   };
 }
