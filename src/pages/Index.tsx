@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PatientHeader, { PatientData } from '@/components/PatientHeader';
@@ -8,6 +7,11 @@ import DocumentGenerator from '@/components/DocumentGenerator';
 import { Toaster } from "@/components/ui/toaster";
 import { Card, CardContent } from "@/components/ui/card";
 import HoverSidebar from '@/components/HoverSidebar';
+import { Button } from '@/components/ui/button';
+import { LogIn, LogOut, UserRound } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import LoginButton from '@/components/LoginButton';
 
 const Index = () => {
   const [patientData, setPatientData] = useState<PatientData>({
@@ -39,8 +43,20 @@ const Index = () => {
     plans: ''
   });
   
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
+
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
+  const handleLogoutClick = async () => {
+    await logout();
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <LoginButton />
       <header className="bg-gradient-to-r from-medblue-700 via-medblue-600 to-medblue-500 text-white py-4 px-6 shadow-lg sticky top-0 z-10">
         <div className="container flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -52,9 +68,23 @@ const Index = () => {
               <p className="text-white/90 font-medium text-sm text-center">Prontuários Médicos Digitais</p>
             </div>
           </div>
-          <div className="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm py-2 px-4 rounded-full shadow-inner">
-            <span className="text-sm font-semibold text-white">Hospital Dr. Aurélio</span>
-            <span className="inline-block h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 bg-white/10 backdrop-blur-sm py-2 px-4 rounded-full shadow-inner">
+              <span className="text-sm font-semibold text-white">Hospital Dr. Aurélio</span>
+              <span className="inline-block h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+            </div>
+            <Button
+              variant="outline"
+              className="text-white border-white hover:bg-white/20 hover:text-white"
+              onClick={isAuthenticated ? handleLogoutClick : handleLoginClick}
+              title={isAuthenticated ? 'Sair' : 'Entrar'}
+            >
+              {isAuthenticated ? (
+                <><UserRound className="mr-2 h-4 w-4" /> Sair</>
+              ) : (
+                <><LogIn className="mr-2 h-4 w-4" /> Login</>
+              )}
+            </Button>
           </div>
         </div>
       </header>
