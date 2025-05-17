@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { toast } from '@/components/ui/use-toast';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -54,6 +55,7 @@ export function useAuth() {
       });
 
       if (error) throw error;
+      
       console.log('useAuth - Login bem-sucedido:', data.user?.email);
       return { user: data.user, error: null };
     } catch (error: any) {
@@ -65,13 +67,36 @@ export function useAuth() {
   const signup = async (email: string, password: string) => {
     try {
       console.log('useAuth - Tentando cadastro:', email);
+      
+      // Using signUp with email confirmation disabled
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            created_at: new Date().toISOString(),
+          }
+        }
       });
 
       if (error) throw error;
-      console.log('useAuth - Cadastro bem-sucedido:', data.user?.email);
+      
+      console.log('useAuth - Cadastro bem-sucedido:', data);
+      
+      // Create a profile record for the new user
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            { id: data.user.id, name: email.split('@')[0] }
+          ]);
+        
+        if (profileError) {
+          console.error('useAuth - Erro ao criar perfil:', profileError);
+        }
+      }
+      
       return { user: data.user, error: null };
     } catch (error: any) {
       console.error('useAuth - Erro no cadastro:', error.message);

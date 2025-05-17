@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -28,16 +29,36 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [activeTab, setActiveTab] = useState('login');
 
   useEffect(() => {
     // Redirecionar para página principal se já estiver autenticado
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/index');
     }
   }, [isAuthenticated, navigate]);
 
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateEmail(email)) {
+      toast({
+        title: "Email inválido",
+        description: "Por favor, insira um email válido.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       setLoading(true);
@@ -47,19 +68,25 @@ const Login = () => {
         throw error;
       }
 
-      // Sincronizar modelos locais com Supabase após login
-      await syncLocalModelsToSupabase(user?.id);
+      if (user) {
+        // Sincronizar modelos locais com Supabase após login
+        await syncLocalModelsToSupabase(user.id);
 
-      toast({
-        title: "Login realizado com sucesso",
-        description: "Você será redirecionado para a página inicial.",
-      });
-      
-      navigate('/');
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Você será redirecionado para a página inicial.",
+        });
+        
+        navigate('/index');
+      } else {
+        throw new Error("Falha no login. Por favor, tente novamente.");
+      }
     } catch (error: any) {
       toast({
         title: "Erro ao fazer login",
-        description: error.message || "Verifique suas credenciais e tente novamente.",
+        description: error.message === "Invalid login credentials"
+          ? "Email ou senha incorretos."
+          : error.message || "Verifique suas credenciais e tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -69,6 +96,33 @@ const Login = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateEmail(email)) {
+      toast({
+        title: "Email inválido",
+        description: "Por favor, insira um email válido.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!validatePassword(password)) {
+      toast({
+        title: "Senha fraca",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Senhas não conferem",
+        description: "As senhas digitadas não são iguais.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       setLoading(true);
@@ -80,12 +134,23 @@ const Login = () => {
 
       toast({
         title: "Cadastro realizado com sucesso",
-        description: "Verifique seu email para confirmar o cadastro.",
+        description: "Sua conta foi criada. Agora você pode fazer login.",
       });
+      
+      // Mudar para a aba de login após o cadastro
+      setActiveTab('login');
     } catch (error: any) {
+      const errorMsg = error.message || "Ocorreu um erro ao criar sua conta.";
+      
+      // Mensagens de erro mais amigáveis
+      let userFriendlyMessage = errorMsg;
+      if (errorMsg.includes("User already registered")) {
+        userFriendlyMessage = "Este email já está cadastrado. Tente fazer login.";
+      }
+      
       toast({
         title: "Erro ao criar conta",
-        description: error.message || "Verifique suas credenciais e tente novamente.",
+        description: userFriendlyMessage,
         variant: "destructive",
       });
     } finally {
@@ -116,7 +181,7 @@ const Login = () => {
             </CardDescription>
           </div>
         </CardHeader>
-        <Tabs defaultValue="login" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 my-4 mx-6">
             <TabsTrigger value="login">Login</TabsTrigger>
             <TabsTrigger value="signup">Cadastro</TabsTrigger>
@@ -188,6 +253,19 @@ const Login = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                  <p className="text-xs text-gray-500">A senha deve ter pelo menos 6 caracteres</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirmar Senha</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
                 </div>
