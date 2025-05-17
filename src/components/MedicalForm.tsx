@@ -191,8 +191,8 @@ const MedicalForm: React.FC<MedicalFormProps> = ({ onDataChange }) => {
           {fieldLabels[field]}
         </Label>
         <div className="flex gap-2">
-          {field === 'admission' && (
-            <AudioToTextButton value={formData.admission} onChange={v => handleChange('admission', v)} />
+          {(field === 'admission' || field === 'comorbidities' || field === 'medicationReason' || field === 'analysis' || field === 'plans') && (
+            <AudioToTextButton value={formData[field]} onChange={v => handleChange(field, v)} />
           )}
           <Button 
             variant="outline" 
