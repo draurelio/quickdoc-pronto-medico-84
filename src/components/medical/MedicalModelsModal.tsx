@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Trash2, Save, FilePlus, Edit, Check } from 'lucide-react';
@@ -34,6 +33,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
   const [editingModelId, setEditingModelId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const { toast } = useToast();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Carregar modelos do Supabase
   const fetchModels = async () => {
@@ -42,6 +42,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
     try {
       setLoading(true);
       const { data: session } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session?.session?.user);
       
       if (session?.session?.user) {
         const { data, error } = await supabase
@@ -92,6 +93,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
       setLoading(true);
       
       const { data: session } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session?.session?.user);
       
       if (session?.session?.user) {
         // Salvar no Supabase
@@ -142,7 +144,8 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
         
         toast({
           title: 'Modelo salvo localmente',
-          description: 'Faça login para salvar os modelos na nuvem.',
+          description: 'Faça login para salvar os modelos na nuvem e acessar de qualquer computador.',
+          variant: 'destructive',
         });
       }
       
@@ -303,8 +306,8 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
           <Button 
             onClick={handleSaveModel} 
             className="bg-blue-600 hover:bg-blue-700 text-white" 
-            title="Salvar modelo"
-            disabled={loading || !modelName.trim()}
+            title={isLoggedIn ? 'Salvar modelo' : 'Faça login para salvar na nuvem'}
+            disabled={loading || !modelName.trim() || !isLoggedIn}
           >
             {loading ? (
               <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
@@ -313,6 +316,12 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
             )}
           </Button>
         </div>
+        
+        {!isLoggedIn && (
+          <div className="mb-2 text-sm text-red-600 font-semibold text-center">
+            Faça login para salvar modelos na nuvem e acessar de qualquer computador.
+          </div>
+        )}
         
         {loading && !models.length && (
           <div className="flex justify-center py-4">
