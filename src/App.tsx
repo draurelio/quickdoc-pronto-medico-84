@@ -9,7 +9,10 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import PrescriptionHistory from "./pages/PrescriptionHistory";
+import Profile from "./pages/Profile";
+import ChangePassword from "./pages/ChangePassword";
 import ProtectedRoute from "./components/ProtectedRoute";
+import UserMenu from "./components/UserMenu";
 
 // Create QueryClient outside component to prevent recreation on each render
 const queryClient = new QueryClient({
@@ -40,6 +43,7 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <PrescriptionHistory />
+                    <UserMenu />
                   </ProtectedRoute>
                 } 
               />
@@ -48,6 +52,25 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <Index />
+                    <UserMenu />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                    <UserMenu />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/change-password" 
+                element={
+                  <ProtectedRoute>
+                    <ChangePassword />
+                    <UserMenu />
                   </ProtectedRoute>
                 } 
               />
