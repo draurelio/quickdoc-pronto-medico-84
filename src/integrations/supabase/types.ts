@@ -9,120 +9,18 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      medical_models: {
-        Row: {
-          content: string
-          created_at: string
-          field: string
-          id: string
-          name: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          field: string
-          id?: string
-          name: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          field?: string
-          id?: string
-          name?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      prescription_models: {
+      "dr aurelio": {
         Row: {
           created_at: string
-          id: string
-          name: string
-          prescriptions: Json
-          updated_at: string
-          user_id: string
+          id: number
         }
         Insert: {
           created_at?: string
-          id?: string
-          name: string
-          prescriptions: Json
-          updated_at?: string
-          user_id: string
+          id?: number
         }
         Update: {
           created_at?: string
-          id?: string
-          name?: string
-          prescriptions?: Json
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      prescriptions: {
-        Row: {
-          admission_date: string | null
-          created_at: string
-          diagnosis: string | null
-          id: string
-          medical_data: Json
-          patient_age: string | null
-          patient_data: Json
-          patient_name: string
-          prescription_data: Json
-          user_id: string
-        }
-        Insert: {
-          admission_date?: string | null
-          created_at?: string
-          diagnosis?: string | null
-          id?: string
-          medical_data: Json
-          patient_age?: string | null
-          patient_data: Json
-          patient_name: string
-          prescription_data: Json
-          user_id: string
-        }
-        Update: {
-          admission_date?: string | null
-          created_at?: string
-          diagnosis?: string | null
-          id?: string
-          medical_data?: Json
-          patient_age?: string | null
-          patient_data?: Json
-          patient_name?: string
-          prescription_data?: Json
-          user_id?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          created_at: string
-          id: string
-          name: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id: string
-          name?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string | null
-          updated_at?: string
+          id?: number
         }
         Relationships: []
       }
