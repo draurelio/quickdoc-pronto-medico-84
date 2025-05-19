@@ -13,11 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { UserRound, Settings, Mail } from 'lucide-react';
+import { UserRound, Settings, Mail, Users } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 const UserMenu = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
@@ -52,6 +52,10 @@ const UserMenu = () => {
   const handleChangePassword = () => {
     navigate('/change-password');
   };
+  
+  const handleUserManagement = () => {
+    navigate('/user-management');
+  };
 
   return (
     <div className="fixed top-4 right-4 z-50">
@@ -82,6 +86,17 @@ const UserMenu = () => {
             <Settings className="mr-2 h-4 w-4" />
             <span>Alterar Senha</span>
           </DropdownMenuItem>
+          
+          {isAdmin && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleUserManagement}>
+                <Users className="mr-2 h-4 w-4" />
+                <span>Gerenciar Usuários</span>
+              </DropdownMenuItem>
+            </>
+          )}
+          
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
             <Mail className="mr-2 h-4 w-4" />

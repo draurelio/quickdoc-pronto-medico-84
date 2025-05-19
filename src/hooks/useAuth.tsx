@@ -7,15 +7,21 @@ import { toast } from '@/components/ui/use-toast';
 // Admin user email for special privileges
 const ADMIN_EMAIL = 'med.hospitaldraurelio@gmail.com';
 
+type UserStatus = 'pending' | 'approved' | 'rejected';
+
 type AuthContextType = {
   user: User | null;
   session: Session | null;
   loading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  userStatus: UserStatus;
   login: (email: string, password: string) => Promise<{ user: User | null; error: Error | null }>;
   signup: (email: string, password: string) => Promise<{ user: User | null; error: Error | null }>;
   logout: () => Promise<{ error: Error | null }>;
+  getPendingUsers: () => Promise<any[]>;
+  approveUser: (userId: string) => Promise<void>;
+  rejectUser: (userId: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,6 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userStatus, setUserStatus] = useState<UserStatus>('pending');
 
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
@@ -42,6 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === 'SIGNED_IN' && newSession?.user) {
           setTimeout(() => {
             console.log('User signed in:', newSession.user);
+            fetchUserStatus(newSession.user.id);
           }, 0);
         }
       }
@@ -52,6 +60,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Current session:', currentSession);
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
+      
+      if (currentSession?.user) {
+        fetchUserStatus(currentSession.user.id);
+      }
+      
       setLoading(false);
     });
 
@@ -59,6 +72,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       subscription.unsubscribe();
     };
   }, []);
+  
+  const fetchUserStatus = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('status')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching user status:', error);
+        return;
+      }
+      
+      // If no status or admin, treat as approved
+      if (!data || !data.status || isAdmin) {
+        setUserStatus('approved');
+      } else {
+        setUserStatus(data.status as UserStatus);
+      }
+    } catch (error) {
+      console.error('Error in fetchUserStatus:', error);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     try {
@@ -91,6 +128,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) throw error;
       
+      // After signup, set the user status as pending
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ status: 'pending' })
+          .eq('id', data.user.id);
+          
+        if (profileError) {
+          console.error('Error updating profile status:', profileError);
+        }
+      }
+      
       return { user: data.user, error: null };
     } catch (error: any) {
       console.error('Signup error:', error.message);
@@ -108,6 +157,91 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { error };
     }
   };
+  
+  // Admin functions to manage users
+  const getPendingUsers = async () => {
+    if (!isAdmin) {
+      console.error('Only admins can get pending users');
+      return [];
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name, email, created_at, status')
+        .eq('status', 'pending');
+        
+      if (error) {
+        console.error('Error fetching pending users:', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (error) {
+      console.error('Error in getPendingUsers:', error);
+      return [];
+    }
+  };
+  
+  const approveUser = async (userId: string) => {
+    if (!isAdmin) {
+      throw new Error('Only admins can approve users');
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: 'approved' })
+        .eq('id', userId);
+        
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Usuário aprovado",
+        description: "O usuário agora tem acesso ao sistema",
+      });
+    } catch (error: any) {
+      console.error('Error approving user:', error);
+      toast({
+        title: "Erro ao aprovar usuário",
+        description: error.message || "Não foi possível aprovar o usuário",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+  
+  const rejectUser = async (userId: string) => {
+    if (!isAdmin) {
+      throw new Error('Only admins can reject users');
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: 'rejected' })
+        .eq('id', userId);
+        
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Usuário rejeitado",
+        description: "O acesso do usuário foi negado",
+      });
+    } catch (error: any) {
+      console.error('Error rejecting user:', error);
+      toast({
+        title: "Erro ao rejeitar usuário",
+        description: error.message || "Não foi possível rejeitar o usuário",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
 
   const value = {
     user,
@@ -115,9 +249,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loading,
     isAuthenticated: !!user,
     isAdmin,
+    userStatus,
     login,
     signup,
     logout,
+    getPendingUsers,
+    approveUser,
+    rejectUser,
   };
 
   return (
