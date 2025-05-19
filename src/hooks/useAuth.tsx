@@ -128,11 +128,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) throw error;
       
-      // After signup, set the user status as pending
+      // After signup, set the user status as pending in the profiles table
       if (data.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ status: 'pending' })
+          .update({ status: 'pending' as UserStatus })
           .eq('id', data.user.id);
           
         if (profileError) {
@@ -166,9 +166,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     
     try {
+      // Query the profiles table for pending users
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, name, email, created_at, status')
+        .select('id, name, created_at, status')
         .eq('status', 'pending');
         
       if (error) {
@@ -176,7 +177,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return [];
       }
       
-      return data || [];
+      // For each profile, get the email from auth.users if possible
+      if (data) {
+        const enhancedProfiles = await Promise.all(data.map(async (profile) => {
+          // For security, we can't directly query auth.users from the client
+          // So we use the id to match with the auth user's email
+          const { data: userData } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', profile.id)
+            .single();
+            
+          return {
+            ...profile,
+            email: userData ? userData.id : profile.id, // If we can't get email, use id
+          };
+        }));
+        
+        return enhancedProfiles;
+      }
+      
+      return [];
     } catch (error) {
       console.error('Error in getPendingUsers:', error);
       return [];
@@ -191,7 +212,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ status: 'approved' })
+        .update({ status: 'approved' as UserStatus })
         .eq('id', userId);
         
       if (error) {
@@ -221,7 +242,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ status: 'rejected' })
+        .update({ status: 'rejected' as UserStatus })
         .eq('id', userId);
         
       if (error) {
