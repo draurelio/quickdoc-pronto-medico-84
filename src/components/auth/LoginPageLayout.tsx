@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -9,8 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, UserRound } from 'lucide-react';
+import { UserRound } from 'lucide-react';
 import {
   Tabs,
   TabsContent,
@@ -33,8 +31,6 @@ const LoginPageLayout: React.FC<LoginPageLayoutProps> = ({
   signupForm,
   loading = false
 }) => {
-  const navigate = useNavigate();
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -73,15 +69,6 @@ const LoginPageLayout: React.FC<LoginPageLayoutProps> = ({
             </CardContent>
           </TabsContent>
         </Tabs>
-        <CardFooter className="flex justify-center pt-0 pb-6">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/')}
-            className="flex items-center"
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" /> Voltar para o início
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   );

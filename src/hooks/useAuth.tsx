@@ -1,86 +1,60 @@
 
-import { useState, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect, createContext, useContext } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 // Admin user email for special privileges
 const ADMIN_EMAIL = 'med.hospitaldraurelio@gmail.com';
 
-export function useAuth() {
+type AuthContextType = {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  login: (email: string, password: string) => Promise<{ user: User | null; error: Error | null }>;
+  signup: (email: string, password: string) => Promise<{ user: User | null; error: Error | null }>;
+  logout: () => Promise<{ error: Error | null }>;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Check if current user is admin
   const isAdmin = user?.email === ADMIN_EMAIL;
 
   useEffect(() => {
-    // Verify current session
-    const checkSession = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase.auth.getSession();
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        console.log('Auth state changed:', event);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         
-        if (error) {
-          console.error('Authentication error:', error);
-        } else {
-          setUser(data.session?.user || null);
+        // Using setTimeout to avoid potential deadlocks with Supabase's auth system
+        if (event === 'SIGNED_IN' && newSession?.user) {
+          setTimeout(() => {
+            console.log('User signed in:', newSession.user);
+          }, 0);
         }
-      } catch (error) {
-        console.error('Failed to get user session:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSession();
-
-    // Setup authentication state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event);
-        
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          setUser(session?.user || null);
-          
-          // Create profile if this is first login
-          if (session?.user) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-              
-            if (!profile) {
-              // Set admin flag if the user is the admin
-              const isAdminUser = session.user.email === ADMIN_EMAIL;
-              
-              const { error: profileError } = await supabase
-                .from('profiles')
-                .insert([
-                  { 
-                    id: session.user.id, 
-                    name: session.user.email?.split('@')[0] || 'User',
-                    is_admin: isAdminUser
-                  }
-                ]);
-              
-              if (profileError) {
-                console.error('Error creating automatic profile:', profileError);
-              }
-            }
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
-        
-        setLoading(false);
       }
     );
 
-    // Clean up listener when component unmounts
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log('Current session:', currentSession);
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setLoading(false);
+    });
+
     return () => {
-      authListener.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -115,26 +89,6 @@ export function useAuth() {
 
       if (error) throw error;
       
-      // Create a profile record for the new user
-      if (data.user) {
-        // Check if user being created is the admin
-        const isAdminUser = data.user.email === ADMIN_EMAIL;
-        
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            { 
-              id: data.user.id, 
-              name: email.split('@')[0] || 'User',
-              is_admin: isAdminUser 
-            }
-          ]);
-        
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-        }
-      }
-      
       return { user: data.user, error: null };
     } catch (error: any) {
       console.error('Signup error:', error.message);
@@ -153,13 +107,28 @@ export function useAuth() {
     }
   };
 
-  return {
-    user,
-    loading,
-    login,
-    signup,
-    logout,
-    isAuthenticated: !!user,
-    isAdmin,
-  };
-}
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        isAuthenticated: !!user,
+        isAdmin,
+        login,
+        signup,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

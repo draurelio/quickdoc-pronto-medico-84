@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { LogIn } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { syncLocalModelsToSupabase } from '@/utils/syncLocalModelsToSupabase';
 
 interface LoginFormProps {
   email: string;
@@ -16,9 +15,12 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const from = location.state?.from?.pathname || '/index';
 
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -46,18 +48,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail }) => {
       }
 
       if (user) {
-        // Synchronize local models with Supabase after login
-        await syncLocalModelsToSupabase(user.id);
-        
-        // Check if admin login
         const isAdmin = email === 'med.hospitaldraurelio@gmail.com';
         
         toast({
           title: isAdmin ? "Login de Administrador" : "Login realizado com sucesso",
-          description: "Você será redirecionado para a página inicial.",
+          description: "Bem-vindo ao sistema.",
         });
         
-        navigate('/index');
+        navigate(from, { replace: true });
       } else {
         throw new Error("Falha no login. Por favor, tente novamente.");
       }
