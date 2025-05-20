@@ -24,6 +24,45 @@ export type Database = {
         }
         Relationships: []
       }
+      prescriptions: {
+        Row: {
+          admission_date: string | null
+          created_at: string | null
+          diagnosis: string | null
+          id: string
+          medical_data: Json | null
+          patient_age: string | null
+          patient_data: Json | null
+          patient_name: string | null
+          prescription_data: Json | null
+          user_id: string
+        }
+        Insert: {
+          admission_date?: string | null
+          created_at?: string | null
+          diagnosis?: string | null
+          id?: string
+          medical_data?: Json | null
+          patient_age?: string | null
+          patient_data?: Json | null
+          patient_name?: string | null
+          prescription_data?: Json | null
+          user_id: string
+        }
+        Update: {
+          admission_date?: string | null
+          created_at?: string | null
+          diagnosis?: string | null
+          id?: string
+          medical_data?: Json | null
+          patient_age?: string | null
+          patient_data?: Json | null
+          patient_name?: string | null
+          prescription_data?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -47,6 +86,63 @@ export type Database = {
           is_admin?: boolean | null
           name?: string | null
           status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      shared_medical_models: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string | null
+          field: string
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          field: string
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          field?: string
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      shared_prescription_models: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+          prescriptions: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name: string
+          prescriptions: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          prescriptions?: Json
           updated_at?: string | null
         }
         Relationships: []

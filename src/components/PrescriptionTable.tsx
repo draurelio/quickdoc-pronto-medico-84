@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody } from "@/components/ui/table";
@@ -12,6 +13,7 @@ import InjectableModal from './InjectableModal';
 import { InjectableMedication } from '../data/injectablesData';
 import PrescriptionModelsModal from './prescriptions/PrescriptionModelsModal';
 import { FilePlus } from 'lucide-react';
+
 export interface PrescriptionItem {
   id: string;
   medication: string;
@@ -28,9 +30,11 @@ export interface PrescriptionItem {
     notes?: string[];
   };
 }
+
 interface PrescriptionTableProps {
   onDataChange: (data: PrescriptionItem[]) => void;
 }
+
 const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
   onDataChange
 }) => {
@@ -46,6 +50,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
   const [isAntibioticsModalOpen, setIsAntibioticsModalOpen] = useState(false);
   const [isInjectableModalOpen, setIsInjectableModalOpen] = useState(false);
   const [isModelsModalOpen, setIsModelsModalOpen] = useState(false);
+
   const updateField = (id: string, field: keyof PrescriptionItem, value: string) => {
     const upperValue = value.toUpperCase();
     const updatedPrescriptions = prescriptions.map(prescription => prescription.id === id ? {
@@ -55,6 +60,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
     setPrescriptions(updatedPrescriptions);
     onDataChange(updatedPrescriptions);
   };
+
   const addRow = () => {
     const newPrescription: PrescriptionItem = {
       id: uuidv4(),
@@ -69,6 +75,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
     setPrescriptions(updatedPrescriptions);
     onDataChange(updatedPrescriptions);
   };
+
   const removeRow = (id: string) => {
     if (prescriptions.length > 1) {
       const updatedPrescriptions = prescriptions.filter(p => p.id !== id);
@@ -86,10 +93,12 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
     }
     return '';
   };
+
   const handleAddDefaultMedications = (defaultMeds: PrescriptionItem[]) => {
     setPrescriptions(defaultMeds);
     onDataChange(defaultMeds);
   };
+
   const handleAddAntibiotic = (antibiotic: OralMedication) => {
     const newPrescription: PrescriptionItem = {
       id: uuidv4(),
@@ -105,6 +114,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
     onDataChange(updatedPrescriptions);
     setIsAntibioticsModalOpen(false);
   };
+
   const handleAddInjectable = (medication: InjectableMedication) => {
     const newPrescription: PrescriptionItem = {
       id: uuidv4(),
@@ -120,11 +130,13 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
     onDataChange(updatedPrescriptions);
     setIsInjectableModalOpen(false);
   };
+
   const handleApplyModel = (model: PrescriptionItem[]) => {
     setPrescriptions(model);
     onDataChange(model);
     setIsModelsModalOpen(false);
   };
+
   return <Card className="mb-6">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
@@ -132,7 +144,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
           <div className="flex gap-2">
             <DefaultMedicationsButton onAddDefaults={handleAddDefaultMedications} />
             <button type="button" onClick={() => setIsModelsModalOpen(true)} className="flex items-center gap-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded shadow-sm border border-blue-200 font-medium text-base">
-              <FilePlus size={18} /> Modelo
+              <FilePlus size={18} /> Modelos Compartilhados
             </button>
           </div>
         </div>
@@ -153,4 +165,5 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({
       </CardContent>
     </Card>;
 };
+
 export default PrescriptionTable;

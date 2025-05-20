@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { PatientData } from "./PatientHeader";
@@ -9,8 +10,9 @@ import { toast } from "@/components/ui/use-toast";
 import { FileText } from "lucide-react";
 import { OralMedication } from '../data/antibioticsData';
 import { formatDate } from '../utils/formatUtils';
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '@/hooks/useAuth';
 
 interface DocumentGeneratorProps {
   patientData: PatientData;
@@ -31,6 +33,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
   medicalData,
 }) => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   const checkRequiredFields = () => {
     if (!patientData.name) {
@@ -46,12 +49,10 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
 
   const savePrescriptionToDatabase = async () => {
     try {
-      const { data: session } = await supabase.auth.getSession();
-      
-      if (!session?.session?.user) {
+      if (!isAuthenticated || !user) {
         toast({
           title: "Atenção",
-          description: "É necessário estar logado para salvar prescrições.",
+          description: "É necessário estar logado para salvar prescrições no histórico compartilhado.",
           variant: "destructive",
         });
         return false;
@@ -60,7 +61,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
       const { data, error } = await supabase
         .from('prescriptions')
         .insert({
-          user_id: session.session.user.id,
+          user_id: user.id,
           patient_name: patientData.name,
           patient_age: patientData.age,
           admission_date: patientData.admissionDate,
@@ -74,7 +75,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
         console.error("Erro ao salvar prescrição:", error);
         toast({
           title: "Erro",
-          description: "Ocorreu um erro ao salvar a prescrição no histórico.",
+          description: "Ocorreu um erro ao salvar a prescrição no histórico compartilhado.",
           variant: "destructive",
         });
         return false;
@@ -82,14 +83,14 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
       
       toast({
         title: "Sucesso!",
-        description: "Prescrição salva no histórico com sucesso.",
+        description: "Prescrição salva no histórico compartilhado com sucesso.",
       });
       return true;
     } catch (error) {
       console.error("Erro ao salvar prescrição:", error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao salvar a prescrição no histórico.",
+        description: "Ocorreu um erro ao salvar a prescrição no histórico compartilhado.",
         variant: "destructive",
       });
       return false;
@@ -110,7 +111,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
         medical: medicalData
       });
       
-      // Salvar no banco de dados
+      // Salvar no banco de dados compartilhado
       await savePrescriptionToDatabase();
       
       toast({
@@ -255,7 +256,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
       <CardContent className="pt-6">
         <div className="flex flex-col items-center">
           <p className="text-center text-muted-foreground mb-4">
-            Após preencher todos os campos necessários, clique no botão abaixo para gerar e baixar o prontuário médico.
+            Após preencher todos os campos necessários, clique no botão abaixo para gerar, baixar e compartilhar o prontuário médico.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button 
@@ -263,7 +264,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
               className="bg-green-600 hover:bg-green-700 text-lg py-6"
               size="lg"
             >
-              <FileText className="mr-2" /> GERAR PRESCRIÇÃO
+              <FileText className="mr-2" /> GERAR E COMPARTILHAR
             </Button>
             <Button 
               onClick={handleViewHistory}
@@ -271,7 +272,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
               size="lg"
               variant="outline"
             >
-              HISTÓRICO DE PRESCRIÇÕES
+              HISTÓRICO COMPARTILHADO
             </Button>
           </div>
         </div>

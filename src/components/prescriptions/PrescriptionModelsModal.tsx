@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Trash2, Save, FilePlus, Edit, Check } from 'lucide-react';
 import { PrescriptionItem } from '../PrescriptionTable';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface PrescriptionModelsModal {
@@ -16,6 +17,7 @@ interface PrescriptionModel {
   id?: string;
   name: string;
   prescriptions: PrescriptionItem[];
+  created_by?: string;
 }
 
 const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, onClose, prescriptions, onApplyModel }) => {
@@ -27,7 +29,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
   const { toast } = useToast();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Carregar modelos do Supabase
+  // Carregar modelos compartilhados do Supabase
   const fetchModels = async () => {
     try {
       setLoading(true);
@@ -36,7 +38,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
       if (session?.session?.user) {
         setIsLoggedIn(true);
         const { data, error } = await supabase
-          .from('prescription_models')
+          .from('shared_prescription_models')
           .select('*')
           .order('created_at', { ascending: false });
           
@@ -45,12 +47,16 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
         setModels(data?.map(item => ({
           id: item.id,
           name: item.name,
-          prescriptions: item.prescriptions
+          prescriptions: item.prescriptions,
+          created_by: item.created_by
         })) || []);
       } else {
-        // Fallback para localStorage se não estiver autenticado
-        const saved = localStorage.getItem('prescription_models');
-        if (saved) setModels(JSON.parse(saved));
+        setIsLoggedIn(false);
+        toast({
+          title: 'Atenção',
+          description: 'Faça login para ver os modelos compartilhados.',
+          variant: 'warning',
+        });
       }
     } catch (error) {
       console.error('Erro ao carregar modelos:', error);
@@ -70,7 +76,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
     }
   }, [isOpen]);
 
-  // Salvar modelo no Supabase
+  // Salvar modelo compartilhado no Supabase
   const handleSaveModel = async () => {
     if (!modelName.trim()) return;
     
@@ -81,13 +87,13 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
       const { data: session } = await supabase.auth.getSession();
       
       if (session?.session?.user) {
-        // Salvar no Supabase
+        // Salvar no Supabase como modelo compartilhado
         const { data, error } = await supabase
-          .from('prescription_models')
+          .from('shared_prescription_models')
           .insert({
             name: modelName.trim(),
             prescriptions: modelPrescriptions,
-            user_id: session.session.user.id
+            created_by: session.session.user.id
           })
           .select();
           
@@ -98,20 +104,21 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
             {
               id: data[0].id,
               name: data[0].name,
-              prescriptions: data[0].prescriptions
+              prescriptions: data[0].prescriptions,
+              created_by: data[0].created_by
             },
             ...models
           ]);
           
           toast({
             title: 'Modelo salvo',
-            description: 'O modelo foi salvo com sucesso.',
+            description: 'O modelo foi compartilhado com todos os usuários.',
           });
         }
       } else {
         toast({
           title: 'Faça login',
-          description: 'É necessário estar logado para salvar modelos na nuvem.',
+          description: 'É necessário estar logado para salvar modelos.',
           variant: 'destructive',
         });
       }
@@ -141,7 +148,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
       if (session?.session?.user) {
         // Atualizar no Supabase
         const { error } = await supabase
-          .from('prescription_models')
+          .from('shared_prescription_models')
           .update({
             name: editName.trim(),
             updated_at: new Date().toISOString()
@@ -162,7 +169,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
       } else {
         toast({
           title: 'Faça login',
-          description: 'É necessário estar logado para editar modelos na nuvem.',
+          description: 'É necessário estar logado para editar modelos.',
           variant: 'destructive',
         });
       }
@@ -187,34 +194,32 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
       setLoading(true);
       
       const { data: session } = await supabase.auth.getSession();
+      const currentModel = models.find(m => m.id === id);
       
-      if (session?.session?.user) {
-        // Excluir do Supabase
+      if (session?.session?.user && currentModel?.created_by === session.session.user.id) {
+        // Excluir do Supabase (apenas o criador pode excluir)
         const { error } = await supabase
-          .from('prescription_models')
+          .from('shared_prescription_models')
           .delete()
           .eq('id', id);
           
         if (error) throw error;
+        
+        // Atualizar estado local
+        const updatedModels = models.filter(model => model.id !== id);
+        setModels(updatedModels);
+        
+        toast({
+          title: 'Modelo excluído',
+          description: 'O modelo foi excluído com sucesso.',
+        });
       } else {
         toast({
-          title: 'Faça login',
-          description: 'É necessário estar logado para excluir modelos na nuvem.',
+          title: 'Permissão negada',
+          description: 'Apenas o criador do modelo pode excluí-lo.',
           variant: 'destructive',
         });
       }
-      
-      // Atualizar estado local
-      const updatedModels = models.filter(model => model.id !== id);
-      setModels(updatedModels);
-      
-      // Atualizar localStorage (para fallback)
-      localStorage.setItem('prescription_models', JSON.stringify(updatedModels));
-      
-      toast({
-        title: 'Modelo excluído',
-        description: 'O modelo foi excluído com sucesso.',
-      });
     } catch (error) {
       console.error('Erro ao excluir modelo:', error);
       toast({
@@ -250,7 +255,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
           <X size={22} />
         </button>
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <FilePlus size={20}/> Modelos de Prescrição
+          <FilePlus size={20}/> Modelos de Prescrição Compartilhados
         </h2>
         
         <div className="mb-4 flex gap-2">
@@ -265,7 +270,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
           <Button 
             onClick={handleSaveModel} 
             className="bg-blue-600 hover:bg-blue-700 text-white" 
-            title={isLoggedIn ? 'Salvar modelo' : 'Faça login para salvar na nuvem'}
+            title={isLoggedIn ? 'Salvar e compartilhar modelo' : 'Faça login para salvar modelos'}
             disabled={loading || !modelName.trim() || !isLoggedIn}
           >
             {loading ? (
@@ -277,7 +282,7 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
         </div>
         {!isLoggedIn && (
           <div className="mb-2 text-sm text-red-600 font-semibold text-center">
-            Faça login para salvar, editar ou excluir modelos na nuvem.
+            Faça login para salvar, editar ou excluir modelos.
           </div>
         )}
         
@@ -292,70 +297,79 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
             <div className="text-gray-500 text-center py-4">Nenhum modelo salvo.</div>
           )}
           
-          {models.map(model => (
-            <div key={model.id} className="flex items-center justify-between py-2">
-              {editingModelId === model.id ? (
-                <div className="flex items-center gap-2 w-full pr-2">
-                  <input
-                    type="text"
-                    className="w-full p-1 border rounded"
-                    value={editName}
-                    onChange={e => setEditName(e.target.value)}
-                    autoFocus
-                  />
-                  <Button 
-                    size="sm" 
-                    className="bg-green-600 hover:bg-green-700" 
-                    onClick={() => handleUpdateModel(model.id as string)}
-                    disabled={!editName.trim()}
-                    title="Confirmar"
-                  >
-                    <Check size={16} />
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={cancelEditing}
-                    title="Cancelar"
-                  >
-                    <X size={16} />
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  <div className="font-medium truncate max-w-[180px]">{model.name}</div>
-                  <div className="flex gap-2">
+          {models.map(model => {
+            const { data: session } = supabase.auth.getSession();
+            const canEdit = session?.session?.user && model.created_by === session.session.user.id;
+            
+            return (
+              <div key={model.id} className="flex items-center justify-between py-2">
+                {editingModelId === model.id ? (
+                  <div className="flex items-center gap-2 w-full pr-2">
+                    <input
+                      type="text"
+                      className="w-full p-1 border rounded"
+                      value={editName}
+                      onChange={e => setEditName(e.target.value)}
+                      autoFocus
+                    />
                     <Button 
                       size="sm" 
-                      className="bg-green-600 hover:bg-green-700 text-white" 
-                      onClick={() => onApplyModel(model.prescriptions)}
-                      title="Aplicar modelo"
+                      className="bg-green-600 hover:bg-green-700" 
+                      onClick={() => handleUpdateModel(model.id as string)}
+                      disabled={!editName.trim()}
+                      title="Confirmar"
                     >
-                      Aplicar
+                      <Check size={16} />
                     </Button>
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="text-blue-500 border-blue-200 hover:bg-blue-50" 
-                      onClick={() => startEditing(model)}
-                      title="Editar nome"
+                      onClick={cancelEditing}
+                      title="Cancelar"
                     >
-                      <Edit size={16}/>
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="text-red-500 border-red-200 hover:bg-red-50" 
-                      onClick={() => handleDeleteModel(model.id as string)}
-                      title="Excluir"
-                    >
-                      <Trash2 size={16}/>
+                      <X size={16} />
                     </Button>
                   </div>
-                </>
-              )}
-            </div>
-          ))}
+                ) : (
+                  <>
+                    <div className="font-medium truncate max-w-[180px]">{model.name}</div>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        className="bg-green-600 hover:bg-green-700 text-white" 
+                        onClick={() => onApplyModel(model.prescriptions)}
+                        title="Aplicar modelo"
+                      >
+                        Aplicar
+                      </Button>
+                      {canEdit && (
+                        <>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-blue-500 border-blue-200 hover:bg-blue-50" 
+                            onClick={() => startEditing(model)}
+                            title="Editar nome"
+                          >
+                            <Edit size={16}/>
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-red-500 border-red-200 hover:bg-red-50" 
+                            onClick={() => handleDeleteModel(model.id as string)}
+                            title="Excluir"
+                          >
+                            <Trash2 size={16}/>
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
