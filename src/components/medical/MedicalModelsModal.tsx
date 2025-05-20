@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Trash2, Save, FilePlus, Edit, Check } from 'lucide-react';
 import { MedicalFormData } from '../MedicalForm';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface MedicalModelsModalProps {
@@ -85,7 +86,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
     }
   }, [isOpen, currentField]);
 
-  // Salvar modelo no Supabase
+  // Salvar modelo no Supabase ou localStorage
   const handleSaveModel = async () => {
     if (!modelName.trim() || !currentField) return;
     
@@ -93,9 +94,9 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
       setLoading(true);
       
       const { data: session } = await supabase.auth.getSession();
-      setIsLoggedIn(!!session?.session?.user);
+      const userIsLoggedIn = !!session?.session?.user;
       
-      if (session?.session?.user) {
+      if (userIsLoggedIn) {
         // Salvar no Supabase
         const { data, error } = await supabase
           .from('medical_models')
@@ -126,10 +127,25 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
           });
         }
       } else {
+        // Salvar no localStorage se não estiver autenticado
+        const newModel: MedicalModel = {
+          id: `local_${Date.now()}`,
+          name: modelName.trim(),
+          field: currentField,
+          content: fieldValue
+        };
+        
+        const saved = localStorage.getItem('medical_models');
+        let allModels = saved ? JSON.parse(saved) : [];
+        allModels = [newModel, ...allModels];
+        localStorage.setItem('medical_models', JSON.stringify(allModels));
+        
+        // Atualizar estado local
+        setModels([newModel, ...models]);
+        
         toast({
-          title: 'Faça login',
-          description: 'É necessário estar logado para salvar modelos na nuvem.',
-          variant: 'destructive',
+          title: 'Modelo salvo localmente',
+          description: 'O modelo foi salvo com sucesso no seu navegador.',
         });
       }
       
@@ -146,16 +162,26 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
     }
   };
 
-  // Atualizar modelo no Supabase
+  // Atualizar modelo
   const handleUpdateModel = async (id: string) => {
     if (!editName.trim()) return;
     
     try {
       setLoading(true);
       
-      const { data: session } = await supabase.auth.getSession();
+      const isLocalModel = id.startsWith('local_');
       
-      if (session?.session?.user) {
+      if (isLocalModel) {
+        // Atualizar no localStorage
+        const saved = localStorage.getItem('medical_models');
+        if (saved) {
+          let allModels = JSON.parse(saved);
+          allModels = allModels.map((model: MedicalModel) => 
+            model.id === id ? { ...model, name: editName.trim() } : model
+          );
+          localStorage.setItem('medical_models', JSON.stringify(allModels));
+        }
+      } else {
         // Atualizar no Supabase
         const { error } = await supabase
           .from('medical_models')
@@ -166,23 +192,17 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
           .eq('id', id);
           
         if (error) throw error;
-        
-        // Atualizar estado local
-        setModels(models.map(model => 
-          model.id === id ? { ...model, name: editName.trim() } : model
-        ));
-        
-        toast({
-          title: 'Modelo atualizado',
-          description: 'O modelo foi atualizado com sucesso.',
-        });
-      } else {
-        toast({
-          title: 'Faça login',
-          description: 'É necessário estar logado para editar modelos na nuvem.',
-          variant: 'destructive',
-        });
       }
+      
+      // Atualizar estado local
+      setModels(models.map(model => 
+        model.id === id ? { ...model, name: editName.trim() } : model
+      ));
+      
+      toast({
+        title: 'Modelo atualizado',
+        description: 'O modelo foi atualizado com sucesso.',
+      });
       
       setEditingModelId(null);
       setEditName('');
@@ -198,14 +218,22 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
     }
   };
 
-  // Excluir modelo do Supabase
+  // Excluir modelo
   const handleDeleteModel = async (id: string) => {
     try {
       setLoading(true);
       
-      const { data: session } = await supabase.auth.getSession();
+      const isLocalModel = id.startsWith('local_');
       
-      if (session?.session?.user) {
+      if (isLocalModel) {
+        // Excluir do localStorage
+        const saved = localStorage.getItem('medical_models');
+        if (saved) {
+          let allModels = JSON.parse(saved);
+          allModels = allModels.filter((model: MedicalModel) => model.id !== id);
+          localStorage.setItem('medical_models', JSON.stringify(allModels));
+        }
+      } else {
         // Excluir do Supabase
         const { error } = await supabase
           .from('medical_models')
@@ -213,25 +241,11 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
           .eq('id', id);
           
         if (error) throw error;
-      } else {
-        toast({
-          title: 'Faça login',
-          description: 'É necessário estar logado para excluir modelos na nuvem.',
-          variant: 'destructive',
-        });
       }
       
       // Atualizar estado local
       const updatedModels = models.filter(model => model.id !== id);
       setModels(updatedModels);
-      
-      // Atualizar localStorage (para fallback)
-      const saved = localStorage.getItem('medical_models');
-      if (saved) {
-        let allModels = JSON.parse(saved);
-        allModels = allModels.filter((model: MedicalModel) => model.id !== id);
-        localStorage.setItem('medical_models', JSON.stringify(allModels));
-      }
       
       toast({
         title: 'Modelo excluído',
@@ -282,13 +296,12 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
             className="w-full p-2 border rounded"
             value={modelName}
             onChange={e => setModelName(e.target.value)}
-            disabled={loading || !isLoggedIn}
           />
           <Button 
             onClick={handleSaveModel} 
             className="bg-blue-600 hover:bg-blue-700 text-white" 
-            title={isLoggedIn ? 'Salvar modelo' : 'Faça login para salvar na nuvem'}
-            disabled={loading || !modelName.trim() || !isLoggedIn}
+            title="Salvar modelo"
+            disabled={loading || !modelName.trim()}
           >
             {loading ? (
               <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
@@ -297,12 +310,6 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
             )}
           </Button>
         </div>
-        
-        {!isLoggedIn && (
-          <div className="mb-2 text-sm text-red-600 font-semibold text-center">
-            Faça login para salvar, editar ou excluir modelos na nuvem.
-          </div>
-        )}
         
         {loading && !models.length && (
           <div className="flex justify-center py-4">
