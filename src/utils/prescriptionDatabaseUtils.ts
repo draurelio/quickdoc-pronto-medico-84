@@ -24,10 +24,10 @@ export const savePrescriptionToDatabase = async (
       return false;
     }
     
-    // Use single object format with Supabase insert
+    // Use array format with Supabase insert
     const { data, error } = await supabase
       .from('prescriptions')
-      .insert({
+      .insert([{  // Wrapping in an array as required by Supabase
         user_id: userId,
         patient_name: patientData.name,
         patient_age: patientData.age,
@@ -36,7 +36,7 @@ export const savePrescriptionToDatabase = async (
         prescription_data: prescriptionData,
         medical_data: medicalData,
         patient_data: patientData
-      });
+      }]);
     
     if (error) {
       console.error("Erro ao salvar prescrição:", error);
