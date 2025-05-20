@@ -33,9 +33,9 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
   const fetchModels = async () => {
     try {
       setLoading(true);
-      const { data: session } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
       
-      if (session?.session?.user) {
+      if (sessionData?.session?.user) {
         setIsLoggedIn(true);
         const { data, error } = await supabase
           .from('shared_prescription_models')
@@ -44,18 +44,23 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
           
         if (error) throw error;
         
-        setModels(data?.map(item => ({
-          id: item.id,
-          name: item.name,
-          prescriptions: item.prescriptions,
-          created_by: item.created_by
-        })) || []);
+        if (data) {
+          const typedModels: PrescriptionModel[] = data.map(item => ({
+            id: item.id,
+            name: item.name,
+            // Corrigido: Garantir que prescriptions seja tratado como PrescriptionItem[]
+            prescriptions: item.prescriptions as unknown as PrescriptionItem[],
+            created_by: item.created_by
+          }));
+          setModels(typedModels);
+        }
       } else {
         setIsLoggedIn(false);
         toast({
           title: 'Atenção',
           description: 'Faça login para ver os modelos compartilhados.',
-          variant: 'warning',
+          // Corrigido: Usaremos 'destructive' em vez de 'warning'
+          variant: 'destructive',
         });
       }
     } catch (error) {
@@ -84,31 +89,32 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
       setLoading(true);
       const modelPrescriptions = prescriptions.filter(p => p.medication);
       
-      const { data: session } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
       
-      if (session?.session?.user) {
-        // Salvar no Supabase como modelo compartilhado
+      if (sessionData?.session?.user) {
+        // Corrigido: Passando um único objeto em vez de um array
         const { data, error } = await supabase
           .from('shared_prescription_models')
           .insert({
             name: modelName.trim(),
-            prescriptions: modelPrescriptions,
-            created_by: session.session.user.id
+            // Garantindo compatibilidade com o tipo Json do Supabase
+            prescriptions: modelPrescriptions as any,
+            created_by: sessionData.session.user.id
           })
           .select();
           
         if (error) throw error;
         
         if (data && data[0]) {
-          setModels([
-            {
-              id: data[0].id,
-              name: data[0].name,
-              prescriptions: data[0].prescriptions,
-              created_by: data[0].created_by
-            },
-            ...models
-          ]);
+          const newModel: PrescriptionModel = {
+            id: data[0].id,
+            name: data[0].name,
+            // Garantindo que prescriptions seja tratado como PrescriptionItem[]
+            prescriptions: data[0].prescriptions as unknown as PrescriptionItem[],
+            created_by: data[0].created_by
+          };
+          
+          setModels([newModel, ...models]);
           
           toast({
             title: 'Modelo salvo',
@@ -143,9 +149,9 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
     try {
       setLoading(true);
       
-      const { data: session } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
       
-      if (session?.session?.user) {
+      if (sessionData?.session?.user) {
         // Atualizar no Supabase
         const { error } = await supabase
           .from('shared_prescription_models')
@@ -193,10 +199,10 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
     try {
       setLoading(true);
       
-      const { data: session } = await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
       const currentModel = models.find(m => m.id === id);
       
-      if (session?.session?.user && currentModel?.created_by === session.session.user.id) {
+      if (sessionData?.session?.user && currentModel?.created_by === sessionData.session.user.id) {
         // Excluir do Supabase (apenas o criador pode excluir)
         const { error } = await supabase
           .from('shared_prescription_models')
@@ -240,6 +246,13 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
   const cancelEditing = () => {
     setEditingModelId(null);
     setEditName('');
+  };
+
+  const canUserEdit = async (userId: string | undefined): Promise<boolean> => {
+    if (!userId) return false;
+    
+    const { data: sessionData } = await supabase.auth.getSession();
+    return sessionData?.session?.user?.id === userId;
   };
 
   if (!isOpen) return null;
@@ -297,79 +310,74 @@ const PrescriptionModelsModal: React.FC<PrescriptionModelsModal> = ({ isOpen, on
             <div className="text-gray-500 text-center py-4">Nenhum modelo salvo.</div>
           )}
           
-          {models.map(model => {
-            const { data: session } = supabase.auth.getSession();
-            const canEdit = session?.session?.user && model.created_by === session.session.user.id;
-            
-            return (
-              <div key={model.id} className="flex items-center justify-between py-2">
-                {editingModelId === model.id ? (
-                  <div className="flex items-center gap-2 w-full pr-2">
-                    <input
-                      type="text"
-                      className="w-full p-1 border rounded"
-                      value={editName}
-                      onChange={e => setEditName(e.target.value)}
-                      autoFocus
-                    />
+          {models.map(model => (
+            <div key={model.id} className="flex items-center justify-between py-2">
+              {editingModelId === model.id ? (
+                <div className="flex items-center gap-2 w-full pr-2">
+                  <input
+                    type="text"
+                    className="w-full p-1 border rounded"
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    autoFocus
+                  />
+                  <Button 
+                    size="sm" 
+                    className="bg-green-600 hover:bg-green-700" 
+                    onClick={() => handleUpdateModel(model.id as string)}
+                    disabled={!editName.trim()}
+                    title="Confirmar"
+                  >
+                    <Check size={16} />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={cancelEditing}
+                    title="Cancelar"
+                  >
+                    <X size={16} />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="font-medium truncate max-w-[180px]">{model.name}</div>
+                  <div className="flex gap-2">
                     <Button 
                       size="sm" 
-                      className="bg-green-600 hover:bg-green-700" 
-                      onClick={() => handleUpdateModel(model.id as string)}
-                      disabled={!editName.trim()}
-                      title="Confirmar"
+                      className="bg-green-600 hover:bg-green-700 text-white" 
+                      onClick={() => onApplyModel(model.prescriptions)}
+                      title="Aplicar modelo"
                     >
-                      <Check size={16} />
+                      Aplicar
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={cancelEditing}
-                      title="Cancelar"
-                    >
-                      <X size={16} />
-                    </Button>
+                    {model.created_by === isLoggedIn ? (
+                      <>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-blue-500 border-blue-200 hover:bg-blue-50" 
+                          onClick={() => startEditing(model)}
+                          title="Editar nome"
+                        >
+                          <Edit size={16}/>
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-red-500 border-red-200 hover:bg-red-50" 
+                          onClick={() => handleDeleteModel(model.id as string)}
+                          title="Excluir"
+                        >
+                          <Trash2 size={16}/>
+                        </Button>
+                      </>
+                    ) : null}
                   </div>
-                ) : (
-                  <>
-                    <div className="font-medium truncate max-w-[180px]">{model.name}</div>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        className="bg-green-600 hover:bg-green-700 text-white" 
-                        onClick={() => onApplyModel(model.prescriptions)}
-                        title="Aplicar modelo"
-                      >
-                        Aplicar
-                      </Button>
-                      {canEdit && (
-                        <>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-blue-500 border-blue-200 hover:bg-blue-50" 
-                            onClick={() => startEditing(model)}
-                            title="Editar nome"
-                          >
-                            <Edit size={16}/>
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-red-500 border-red-200 hover:bg-red-50" 
-                            onClick={() => handleDeleteModel(model.id as string)}
-                            title="Excluir"
-                          >
-                            <Trash2 size={16}/>
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          })}
+                </>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -13,6 +13,7 @@ import InjectableModal from './InjectableModal';
 import { InjectableMedication } from '../data/injectablesData';
 import PrescriptionModelsModal from './prescriptions/PrescriptionModelsModal';
 import { FilePlus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast'; // Atualizado para o caminho correto
 
 export interface PrescriptionItem {
   id: string;

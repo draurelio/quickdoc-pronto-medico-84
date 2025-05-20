@@ -58,6 +58,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
         return false;
       }
       
+      // Consertado: Passando os dados como um único objeto, não um array
       const { data, error } = await supabase
         .from('prescriptions')
         .insert({
