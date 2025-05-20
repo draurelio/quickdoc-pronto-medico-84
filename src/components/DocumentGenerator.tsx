@@ -58,10 +58,10 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
         return false;
       }
       
-      // Corrigido: Inserindo como array com um único objeto para corresponder à tipagem esperada
+      // Fixed: Using the correct format for Supabase insert
       const { data, error } = await supabase
         .from('prescriptions')
-        .insert([{
+        .insert({
           user_id: user.id,
           patient_name: patientData.name,
           patient_age: patientData.age,
@@ -70,7 +70,7 @@ const DocumentGenerator: React.FC<DocumentGeneratorProps> = ({
           prescription_data: prescriptionData,
           medical_data: medicalData,
           patient_data: patientData
-        }]);
+        });
       
       if (error) {
         console.error("Erro ao salvar prescrição:", error);
