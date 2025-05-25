@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Calculator, MessageCircle } from 'lucide-react';
+import { Calculator, MessageCircle, Flask } from 'lucide-react';
 import CalculatorModal from './calculator/CalculatorModal';
 import ChatDrawer from './ChatDrawer';
 
@@ -7,6 +8,10 @@ const HoverSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const handleLabClick = () => {
+    window.open('https://acesso.unilabor.com.br:8443/ConcentWeb/hlab8000?cEmpCod_aux=0&cFilCod_aux=0&LabWLogTpCod_parm=&Codigo_parm=&cSenha_parm=', '_blank');
+  };
 
   return (
     <>
@@ -39,6 +44,14 @@ const HoverSidebar = () => {
             >
               <MessageCircle className="w-5 h-5" />
               <span className="text-xs mt-1">Chat</span>
+            </button>
+            <button
+              onClick={handleLabClick}
+              className="flex flex-col items-center justify-center w-10 h-10 bg-medblue-50 hover:bg-medblue-100 rounded-md text-medblue-600 transition-colors"
+              title="Laboratório"
+            >
+              <Flask className="w-5 h-5" />
+              <span className="text-xs mt-1">Lab</span>
             </button>
           </div>
         </div>
