@@ -1,6 +1,7 @@
 
+
 import React, { useState } from 'react';
-import { Calculator, MessageCircle, TestTube } from 'lucide-react';
+import { Calculator, MessageCircle, TestTube, Globe } from 'lucide-react';
 import CalculatorModal from './calculator/CalculatorModal';
 import ChatDrawer from './ChatDrawer';
 
@@ -11,6 +12,10 @@ const HoverSidebar = () => {
 
   const handleLabClick = () => {
     window.open('https://acesso.unilabor.com.br:8443/ConcentWeb/hlab8000?cEmpCod_aux=0&cFilCod_aux=0&LabWLogTpCod_parm=&Codigo_parm=&cSenha_parm=', '_blank');
+  };
+
+  const handleTrxClick = () => {
+    window.open('https://auth.logicsolutions.com.br/auth/realms/webpacs/protocol/openid-connect/auth?response_type=code&client_id=web_app&scope=openid%20address%20email%20microprofile-jwt%20offline_access%20phone%20profile%20roles%20web-origins&state=Gpt-2V61euSBXSq0ziTc1ngeyujwidcjzIlhJHwY-OU%3D&redirect_uri=http://webpacs.logicsolutions.com.br/login/oauth2/code/oidc&nonce=mSWph_U0fdaiUlR_lQMpxZ55eVzEpWpGdy5nhMUFhSQ', '_blank');
   };
 
   return (
@@ -53,6 +58,14 @@ const HoverSidebar = () => {
               <TestTube className="w-5 h-5" />
               <span className="text-xs mt-1">Lab</span>
             </button>
+            <button
+              onClick={handleTrxClick}
+              className="flex flex-col items-center justify-center w-10 h-10 bg-medblue-50 hover:bg-medblue-100 rounded-md text-medblue-600 transition-colors"
+              title="TRX"
+            >
+              <Globe className="w-5 h-5" />
+              <span className="text-xs mt-1">TRX</span>
+            </button>
           </div>
         </div>
       </div>
@@ -70,3 +83,4 @@ const HoverSidebar = () => {
 };
 
 export default HoverSidebar;
+
