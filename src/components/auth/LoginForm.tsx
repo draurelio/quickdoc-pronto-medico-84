@@ -79,16 +79,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail }) => {
     }
   };
 
-  // Helper function to pre-fill admin credentials
-  const fillAdminCredentials = () => {
-    setEmail('med.hospitaldraurelio@gmail.com');
-    setPassword('alagoas305');
-    toast({
-      title: "Credenciais de administrador",
-      description: "Credenciais de administrador preenchidas, clique em Entrar.",
-    });
-  };
-
   return (
     <form onSubmit={handleLogin} className="space-y-4">
       <div className="space-y-2">
@@ -132,16 +122,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ email, setEmail }) => {
           </>
         )}
       </Button>
-      
-      <div className="text-center pt-2">
-        <button 
-          type="button"
-          className="text-xs text-gray-500 hover:text-gray-700"
-          onClick={fillAdminCredentials}
-        >
-          Entrar como administrador
-        </button>
-      </div>
     </form>
   );
 };

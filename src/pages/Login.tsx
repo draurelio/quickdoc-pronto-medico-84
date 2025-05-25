@@ -3,16 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LoginForm from '@/components/auth/LoginForm';
-import SignupForm from '@/components/auth/SignupForm';
-import LoginPageLayout from '@/components/auth/LoginPageLayout';
-import { toast } from '@/components/ui/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { UserRound } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, loading } = useAuth();
   const [email, setEmail] = useState('');
-  const [activeTab, setActiveTab] = useState('login');
   
   // Get the redirect path from location state or default to /index
   const from = location.state?.from?.pathname || '/index';
@@ -24,33 +22,36 @@ const Login = () => {
     }
   }, [isAuthenticated, loading, navigate, from]);
 
-  const handleSignupSuccess = () => {
-    setActiveTab('login');
-    toast({
-      title: "Conta criada com sucesso",
-      description: "Agora você pode fazer login com suas credenciais.",
-    });
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-medblue-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <LoginPageLayout
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      loading={loading}
-      loginForm={
-        <LoginForm 
-          email={email} 
-          setEmail={setEmail} 
-        />
-      }
-      signupForm={
-        <SignupForm 
-          email={email} 
-          setEmail={setEmail} 
-          onSignupSuccess={handleSignupSuccess} 
-        />
-      }
-    />
+    <div className="container flex items-center justify-center min-h-screen py-8 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="bg-gradient-to-r from-medblue-100 to-medblue-50">
+          <div className="flex flex-col items-center space-y-2">
+            <UserRound className="h-12 w-12 text-medblue-600" />
+            <CardTitle className="text-xl text-medblue-800 text-center">
+              Acesso ao Sistema
+            </CardTitle>
+            <CardDescription className="text-center">
+              Faça login para acessar o sistema
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent className="mt-6">
+          <LoginForm 
+            email={email} 
+            setEmail={setEmail} 
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
