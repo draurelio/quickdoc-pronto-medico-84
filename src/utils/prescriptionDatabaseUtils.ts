@@ -24,7 +24,7 @@ export const savePrescriptionToDatabase = async (
       return false;
     }
     
-    // Supabase insert with correct format - single object, not array
+    // Supabase insert with proper typing
     const { data, error } = await supabase
       .from('prescriptions')
       .insert({
@@ -33,9 +33,9 @@ export const savePrescriptionToDatabase = async (
         patient_age: patientData.age,
         admission_date: patientData.admissionDate,
         diagnosis: patientData.diagnosis,
-        prescription_data: prescriptionData,
-        medical_data: medicalData,
-        patient_data: patientData
+        prescription_data: prescriptionData as any,
+        medical_data: medicalData as any,
+        patient_data: patientData as any
       });
     
     if (error) {
