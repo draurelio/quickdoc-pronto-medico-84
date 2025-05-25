@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Calculator, MessageCircle, Flask } from 'lucide-react';
+import { Calculator, MessageCircle, TestTube } from 'lucide-react';
 import CalculatorModal from './calculator/CalculatorModal';
 import ChatDrawer from './ChatDrawer';
 
@@ -50,7 +50,7 @@ const HoverSidebar = () => {
               className="flex flex-col items-center justify-center w-10 h-10 bg-medblue-50 hover:bg-medblue-100 rounded-md text-medblue-600 transition-colors"
               title="Laboratório"
             >
-              <Flask className="w-5 h-5" />
+              <TestTube className="w-5 h-5" />
               <span className="text-xs mt-1">Lab</span>
             </button>
           </div>
