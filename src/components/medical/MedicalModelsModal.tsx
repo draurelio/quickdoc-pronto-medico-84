@@ -47,7 +47,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
       
       if (session?.session?.user) {
         const { data, error } = await supabase
-          .from('medical_models')
+          .from('shared_medical_models')
           .select('*')
           .eq('field', currentField)
           .order('created_at', { ascending: false });
@@ -57,7 +57,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
         setModels(data?.map(item => ({
           id: item.id,
           name: item.name,
-          field: item.field,
+          field: item.field as keyof MedicalFormData,
           content: item.content
         })) || []);
       } else {
@@ -99,12 +99,12 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
       if (userIsLoggedIn) {
         // Salvar no Supabase
         const { data, error } = await supabase
-          .from('medical_models')
+          .from('shared_medical_models')
           .insert({
             name: modelName.trim(),
             field: currentField,
             content: fieldValue,
-            user_id: session.session.user.id
+            created_by: session.session.user.id
           })
           .select();
           
@@ -115,7 +115,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
             {
               id: data[0].id,
               name: data[0].name,
-              field: data[0].field,
+              field: data[0].field as keyof MedicalFormData,
               content: data[0].content
             },
             ...models
@@ -184,7 +184,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
       } else {
         // Atualizar no Supabase
         const { error } = await supabase
-          .from('medical_models')
+          .from('shared_medical_models')
           .update({
             name: editName.trim(),
             updated_at: new Date().toISOString()
@@ -236,7 +236,7 @@ const MedicalModelsModal: React.FC<MedicalModelsModalProps> = ({
       } else {
         // Excluir do Supabase
         const { error } = await supabase
-          .from('medical_models')
+          .from('shared_medical_models')
           .delete()
           .eq('id', id);
           
