@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -36,6 +35,14 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({ onDataChange }) =>
     onDataChange(updatedData);
   };
 
+  const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow only numbers
+    if (/^\d*$/.test(value)) {
+      handleChange('age', value);
+    }
+  };
+
   return (
     <Card className="mb-6">
       <CardContent className="pt-6">
@@ -55,8 +62,9 @@ export const PatientHeader: React.FC<PatientHeaderProps> = ({ onDataChange }) =>
             <Input 
               id="age" 
               value={patientData.age} 
-              onChange={(e) => handleChange('age', e.target.value)}
+              onChange={handleAgeChange}
               placeholder="Idade"
+              inputMode="numeric"
             />
           </div>
           <div className="space-y-2">
