@@ -12,6 +12,7 @@ import PrescriptionHistory from "./pages/PrescriptionHistory";
 import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
 import UserManagement from "./pages/UserManagement";
+import MedicalPrescription from "./pages/MedicalPrescription";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserMenu from "./components/UserMenu";
 
@@ -53,6 +54,15 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <Index />
+                    <UserMenu />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/receita-medica" 
+                element={
+                  <ProtectedRoute>
+                    <MedicalPrescription />
                     <UserMenu />
                   </ProtectedRoute>
                 } 
