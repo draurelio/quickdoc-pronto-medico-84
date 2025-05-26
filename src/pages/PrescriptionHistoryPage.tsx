@@ -4,18 +4,20 @@ import PrescriptionHistoryItem from '../components/prescription/PrescriptionHist
 import { Button } from '@/components/ui/button'; // Assuming a Button component exists
 
 // Define an interface for the prescription data from Supabase
+// Define an interface for the prescription data from Supabase
 interface SupabasePrescription {
   id: number;
-  patient_name: string; 
-  date: string; 
-  medication_name: string; 
-  // Assume these fields are available from your Supabase table or a join
+  patient_name: string;
+  date: string;
+  medication_name: string; // This was 'medication' in MedicalPrescription's formData. Assuming 'medication_name' in DB.
   dosage: string;
-  time: string;
   route: string;
-  observations: string;
-  patient_dob: string; // e.g., from a joined 'patients' table
-  patient_contact: string; // e.g., from a joined 'patients' table
+  frequency: string;
+  duration: string;
+  instructions: string; // Changed from 'observations' to match MedicalPrescription form and new DB schema
+  patient_dob: string; 
+  patient_contact: string;
+  // Add any other fields from the 'prescriptions' table that might be needed
 }
 
 const PrescriptionHistoryPage: React.FC = () => {
@@ -31,12 +33,11 @@ const PrescriptionHistoryPage: React.FC = () => {
         // This query now selects more fields, assuming they exist in your 'prescriptions' table
         // or are available via a join. For example, patient_dob and patient_contact might come
         // from a 'patients' table joined with 'prescriptions'.
-        // If using a join, the select string would be more complex, e.g., 
-        // 'id, date, medication_name, dosage, time, route, observations, patients(name, dob, contact)'
-        // And you'd need to ensure 'patient_name' is correctly mapped or use patients.name.
+        // Example: 'id, date, medication_name, dosage, route, frequency, duration, instructions, patient_dob, patient_contact, patients(name, dob, contact)'
+        // For simplicity, assuming patient_name, patient_dob, patient_contact are denormalized or correctly selected.
         const { data, error: supabaseError } = await supabase
           .from('prescriptions') // Replace 'prescriptions' with your actual table name
-          .select('id, patient_name, date, medication_name, dosage, time, route, observations, patient_dob, patient_contact'); // Adjust columns as needed
+          .select('id, patient_name, date, medication_name, dosage, route, frequency, duration, instructions, patient_dob, patient_contact');
 
         if (supabaseError) {
           throw supabaseError;
@@ -81,6 +82,8 @@ const PrescriptionHistoryPage: React.FC = () => {
               <th className="py-2 px-4 border-b">Patient Name</th>
               <th className="py-2 px-4 border-b">Date</th>
               <th className="py-2 px-4 border-b">Medication</th>
+              <th className="py-2 px-4 border-b">Frequency</th>
+              <th className="py-2 px-4 border-b">Duration</th>
               <th className="py-2 px-4 border-b">Actions</th>
             </tr>
           </thead>
@@ -90,20 +93,23 @@ const PrescriptionHistoryPage: React.FC = () => {
                 key={p.id}
                 prescription={{
                   id: p.id,
-                  patientName: p.patient_name,
+                  patientName: p.patient_name, 
                   date: new Date(p.date).toLocaleDateString(),
-                  medication: p.medication_name, // Display medication
-                  patientData: {
-                    name: p.patient_name,
-                    dob: p.patient_dob || "N/A", // Provide fallback if data can be null
-                    contact: p.patient_contact || "N/A", // Provide fallback
-                  },
+                  medication: p.medication_name, 
+                  frequency: p.frequency, // Pass to PrescriptionHistoryItem for display
+                  duration: p.duration,   // Pass to PrescriptionHistoryItem for display
                   fullPrescriptionData: {
-                    medication: p.medication_name, // Or a more detailed medication string if available
+                    medication: p.medication_name,
                     dosage: p.dosage || "N/A",
-                    time: p.time || "N/A",
                     route: p.route || "N/A",
-                    observations: p.observations || "N/A",
+                    frequency: p.frequency || "N/A",
+                    duration: p.duration || "N/A",
+                    observations: p.instructions || "N/A", 
+                  },
+                  patientData: { 
+                    name: p.patient_name,
+                    dob: p.patient_dob || "N/A", 
+                    contact: p.patient_contact || "N/A",
                   },
                 }}
                 onViewDetails={handleViewDetails}

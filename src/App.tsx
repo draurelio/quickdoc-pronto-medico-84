@@ -14,7 +14,7 @@ import ChangePassword from "./pages/ChangePassword";
 import UserManagement from "./pages/UserManagement";
 import MedicalPrescription from "./pages/MedicalPrescription";
 import PatientManagement from "./pages/PatientManagement"; // Import PatientManagement
-import PrescriptionCreation from "./pages/PrescriptionCreation"; // Import PrescriptionCreation
+// PrescriptionCreation import removed
 import PrescriptionHistoryPage from "./pages/PrescriptionHistoryPage"; // Import PrescriptionHistoryPage
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserMenu from "./components/UserMenu";
@@ -106,15 +106,7 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } 
               />
-              <Route 
-                path="/prescriptions/new" 
-                element={
-                  <ProtectedRoute>
-                    <PrescriptionCreation />
-                    <UserMenu />
-                  </ProtectedRoute>
-                } 
-              />
+              {/* Route for /prescriptions/new removed */}
               <Route 
                 path="/prescriptions/history" 
                 element={

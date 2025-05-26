@@ -1,7 +1,7 @@
 
 
 import React, { useState } from 'react';
-import { Calculator, MessageCircle, TestTube, Globe, Users, FilePlus, History } from 'lucide-react'; // Add History icon
+import { Calculator, MessageCircle, TestTube, Globe, Users, History } from 'lucide-react'; // Removed FilePlus icon
 import CalculatorModal from './calculator/CalculatorModal';
 import ChatDrawer from './ChatDrawer';
 
@@ -75,14 +75,7 @@ const HoverSidebar = () => {
               <Users className="w-5 h-5" />
               <span className="text-xs mt-1">Patients</span>
             </button>
-            <button
-              onClick={() => window.location.href = '#/prescriptions/new'}
-              className="flex flex-col items-center justify-center w-10 h-10 bg-medblue-50 hover:bg-medblue-100 rounded-md text-medblue-600 transition-colors"
-              title="New Prescription"
-            >
-              <FilePlus className="w-5 h-5" />
-              <span className="text-xs mt-1">New Rx</span>
-            </button>
+            {/* Removed "New Prescription" button that linked to /prescriptions/new */}
             <button
               onClick={() => window.location.href = '#/prescriptions/history'}
               className="flex flex-col items-center justify-center w-10 h-10 bg-medblue-50 hover:bg-medblue-100 rounded-md text-medblue-600 transition-colors"

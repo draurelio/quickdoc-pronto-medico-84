@@ -10,9 +10,11 @@ interface PatientData {
 interface PrescriptionData {
   medication: string;
   dosage: string;
-  time: string;
   route: string;
-  observations: string;
+  frequency: string; // New field
+  duration: string;  // New field
+  observations: string; // This will map from 'instructions' in MedicalPrescription.tsx
+  time?: string; // Kept if existing PDF logic uses it, will be populated by frequency
 }
 
 export const generatePrescriptionPdf = (patientData: PatientData, prescriptionData: PrescriptionData) => {
@@ -35,12 +37,13 @@ export const generatePrescriptionPdf = (patientData: PatientData, prescriptionDa
   doc.text("Prescription Details:", 10, 110);
   doc.text(`Medication: ${prescriptionData.medication}`, 10, 120);
   doc.text(`Dosage: ${prescriptionData.dosage}`, 10, 130);
-  doc.text(`Time: ${prescriptionData.time}`, 10, 140);
-  doc.text(`Route: ${prescriptionData.route}`, 10, 150);
-  doc.text(`Observations: ${prescriptionData.observations}`, 10, 160);
+  doc.text(`Route: ${prescriptionData.route}`, 10, 140);
+  doc.text(`Frequency: ${prescriptionData.frequency}`, 10, 150); // Changed from Time to Frequency
+  doc.text(`Duration: ${prescriptionData.duration}`, 10, 160);   // Added Duration
+  doc.text(`Instructions/Observations: ${prescriptionData.observations}`, 10, 170); // Changed label
 
   // Placeholder for Digital Signature or QR Code
-  doc.text("Digital Signature / QR Code Placeholder", 10, 180);
+  doc.text("Digital Signature / QR Code Placeholder", 10, 190); // Adjusted y-position
 
   // Format date for filename (YYYY-MM-DD)
   const date = new Date().toISOString().slice(0, 10);
