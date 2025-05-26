@@ -13,6 +13,9 @@ import Profile from "./pages/Profile";
 import ChangePassword from "./pages/ChangePassword";
 import UserManagement from "./pages/UserManagement";
 import MedicalPrescription from "./pages/MedicalPrescription";
+import PatientManagement from "./pages/PatientManagement"; // Import PatientManagement
+import PrescriptionCreation from "./pages/PrescriptionCreation"; // Import PrescriptionCreation
+import PrescriptionHistoryPage from "./pages/PrescriptionHistoryPage"; // Import PrescriptionHistoryPage
 import ProtectedRoute from "./components/ProtectedRoute";
 import UserMenu from "./components/UserMenu";
 
@@ -90,6 +93,33 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute requireAdmin={true}>
                     <UserManagement />
+                    <UserMenu />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/patients" 
+                element={
+                  <ProtectedRoute>
+                    <PatientManagement />
+                    <UserMenu />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/prescriptions/new" 
+                element={
+                  <ProtectedRoute>
+                    <PrescriptionCreation />
+                    <UserMenu />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/prescriptions/history" 
+                element={
+                  <ProtectedRoute>
+                    <PrescriptionHistoryPage />
                     <UserMenu />
                   </ProtectedRoute>
                 } 
